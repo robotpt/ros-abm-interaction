@@ -26,6 +26,7 @@ REQUIRED = [
     'fitbit-reader',
     'pickle_database',
     'robotpt_common_utils',
+    'yaml',
     # 'requests', 'maya', 'records',
 ]
 

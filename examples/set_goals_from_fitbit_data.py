@@ -1,14 +1,9 @@
 from abm_grant_interaction.goal_setter import GoalSetter
-import yaml
+from abm_grant_interaction import param_db
 
 
-secrets_file = 'secrets.yaml'
-
-with open(secrets_file, 'r') as f:
-    data = yaml.load(f, Loader=yaml.FullLoader)
-
-client_id_ = data['client_id']
-client_secret_ = data['client_secret']
+client_id_ = param_db.get(param_db.Keys.FITBIT_CLIENT_ID)
+client_secret_ = param_db.get(param_db.Keys.FITBIT_CLIENT_SECRET)
 
 goal_setter = GoalSetter(
     client_id=client_id_,

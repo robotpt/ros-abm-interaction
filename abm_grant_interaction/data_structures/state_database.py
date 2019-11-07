@@ -1,4 +1,4 @@
-from bkt.bkt import Bkt
+from abm_grant_interaction.bkt.bkt import Bkt
 
 from pickled_database import PickledDatabase
 from robotpt_common_utils import math_tools
@@ -19,6 +19,8 @@ class StateDb(PickledDatabase):
         STEPS_TODAY = 'steps_today'
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
         DAY_OFF = 'day_off'
+        PSYCH_QUESTION_INDEX = 'psych_question_index'
+        PSYCH_QUESTION_ANSWERS = 'psych_question_ANSWERS'
 
     def __init__(
             self,
@@ -75,4 +77,14 @@ class StateDb(PickledDatabase):
                 lambda x: math_tools.is_int(x),
                 lambda x: 0 <= x < 7,
             ]
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.PSYCH_QUESTION_INDEX,
+            0,
+            tests=[
+                lambda x: math_tools.is_int(x),
+            ]
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.PSYCH_QUESTION_ANSWERS,
         )
