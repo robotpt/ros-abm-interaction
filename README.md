@@ -1,15 +1,15 @@
 README
 ======
 
-This specifies the content for the human-robot interaction for the
+> WIP
+
+The content for the human-robot interaction for the
 ABM grant.
 
-Setup
+Setup 
 -----
 
-### Option 1: Clone the repository
-
-> Best if you want to modify or view the code - note that you can do the following inside of a virtual environment
+Clone the repository:
 
     git clone https://github.com/robotpt/abm-grant-interaction
     
@@ -22,10 +22,4 @@ Tests can be run with the following commands.
     
     cd abm-grant-interaction
     python3 -m unittest
-
-### Option 2: Use Pip
-
-> Best if you just want to use it
-
-    python3 -m pip install abm_grant_interaction
 
