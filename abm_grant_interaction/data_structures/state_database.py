@@ -1,0 +1,78 @@
+from bkt.bkt import Bkt
+
+from pickled_database import PickledDatabase
+from robotpt_common_utils import math_tools
+import datetime
+
+
+class StateDb(PickledDatabase):
+
+    class Keys:
+        USER_NAME = 'user_name'
+        FIRST_MEETING = 'first_meeting'
+        AM_CHECKIN_TIME = 'am_checkin_time'
+        PM_CHECKIN_TIME = 'pm_checkin_time'
+        BKT = 'bkt'
+        STEPS_ACTUAL_RECORD = 'steps_actual_record'
+        STEPS_GOAL_RECORD = 'steps_goal_record'
+        IS_MET_GOAL_RECORD = 'is_met_goal_record'
+        STEPS_TODAY = 'steps_today'
+        LAST_FITBIT_SYNC = 'last_fitbit_sync'
+        DAY_OFF = 'day_off'
+
+    def __init__(
+            self,
+            database_path='state.pkl',
+    ):
+        super().__init__(database_path=database_path)
+        self._build()
+
+    def _build(self):
+
+        self.create_key_if_not_exists(
+            StateDb.Keys.USER_NAME,
+            tests=[
+                lambda x: type(x) is str,
+                lambda x: len(x) > 1,
+            ],
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.FIRST_MEETING,
+            tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.AM_CHECKIN_TIME,
+            tests=lambda x: type(x) is datetime.time
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.PM_CHECKIN_TIME,
+            tests=lambda x: type(x) is datetime.time
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.BKT,
+            tests=lambda x: type(x) is Bkt
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.STEPS_ACTUAL_RECORD,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.STEPS_GOAL_RECORD,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.IS_MET_GOAL_RECORD,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.STEPS_TODAY,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.LAST_FITBIT_SYNC,
+            tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.DAY_OFF,
+            tests=[
+                lambda x: math_tools.is_int(x),
+                lambda x: 0 <= x < 7,
+            ]
+        )

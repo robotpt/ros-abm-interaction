@@ -4,7 +4,7 @@ from robotpt_common_utils import lists
 from hmmlearn import hmm
 
 
-class BKT:
+class Bkt:
 
     def __init__(self, pL0, pT, pS, pG):
 
@@ -23,7 +23,7 @@ class BKT:
     def sample(self, n: int):
         model = self._get_model()
         X, _ = model.sample(n)
-        return BKT._hmmlearn_number_array_to_bool_list(X)
+        return Bkt._hmmlearn_number_array_to_bool_list(X)
 
     @staticmethod
     def _hmmlearn_number_array_to_bool_list(nums, value_for_true=1):
@@ -32,7 +32,7 @@ class BKT:
 
     def fit(self, X, lengths=None):
         model = self._get_model()
-        X = BKT._bool_list_to_hmmlearn_number_array(X)
+        X = Bkt._bool_list_to_hmmlearn_number_array(X)
         model.fit(X, lengths)
 
         pL_ = model.startprob_[0]
@@ -40,7 +40,7 @@ class BKT:
         pS_ = model.transmat_[0][1]
         pG_ = model.transmat_[1][0]
 
-        return BKT(pL_, pT_, pS_, pG_)
+        return Bkt(pL_, pT_, pS_, pG_)
 
     @staticmethod
     def _bool_list_to_hmmlearn_number_array(bools, value_if_true=1, value_if_false=0):
@@ -55,7 +55,7 @@ class BKT:
             else:
                 pL_ = (self._pL*self._pS) / (self._pL*self._pS + (1-self._pL)*(1-self._pG))
             self._pL = pL_
-        return BKT(pL_, self._pT, self._pS, self._pG)
+        return Bkt(pL_, self._pT, self._pS, self._pG)
 
     def get_automaticity(self):
         return self._pL
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     pS_ = 0.3
     pG_ = 0.5
 
-    bkt = BKT(pL0_, pT_, pS_, pG_)
+    bkt = Bkt(pL0_, pT_, pS_, pG_)
 
     for update in [True, True, [True, False]]*round(42/4):
         bkt = bkt.update(update)
