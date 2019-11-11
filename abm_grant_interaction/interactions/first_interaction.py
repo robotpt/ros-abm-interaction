@@ -118,7 +118,7 @@ class FirstMeeting:
                 name='ask name',
                 message=Options.Messages.ask_name,
                 options='Okay',
-                transitions = 'introduce self'
+                transitions='introduce self'
             ),
             Node(
                 name='introduce self',

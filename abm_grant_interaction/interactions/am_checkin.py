@@ -1,11 +1,30 @@
 from interaction_engine.messager import Message, Node, DirectedGraph
 from abm_grant_interaction import state_db, param_db, text_populator
 
+import datetime
+
 
 class Common:
 
     class Nodes:
-        pass
+        greeting_morning = Node(
+            name='greeting',
+            content="{greeting_morning}",
+            options="{greeting_morning}",
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            result_type=str,
+            text_populator=text_populator,
+            transitions='exit'
+        )
+        greeting = Node(
+            name='greeting',
+            content="{greeting}",
+            options="{greeting}",
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            result_type=str,
+            text_populator=text_populator,
+            transitions='exit'
+        )
 
     class Graphs:
         pass
@@ -13,110 +32,67 @@ class Common:
 
 class AmCheckin:
 
-    class Nodes:
-        pass
+    class Messages:
 
-    class Graphs:
-        pass
-
-    greeting = DirectedGraph(
-        name='greeting',
-        nodes=[
-            Node(
-                name='greeting',
-                content="{'var': 'greeting'}",
-                options="{'var': 'greeting'}",
-                message_type=Message.Type.MULTIPLE_CHOICE,
-                result_type=str,
-                text_populator=text_populator,
-                transitions='exit'
+        greeting = Message(
+            content="{greeting}",
+            options="{greeting}",
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            result_type=str,
+            text_populator=text_populator,
+        )
+        closing = Message(
+            content="Bye",
+            options=['Bye', 'See ya!'],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            result_type=str,
+            text_populator=text_populator,
+        )
+        big_5_question = Message(
+            content=(
+                    "How do you feel about the following statement? " +
+                    "'{'var': 'big_5_question', 'index': " +
+                    "'{'db': '%s', 'post-op': 'increment'}'}'" % state_db.Keys.PSYCH_QUESTION_INDEX
             ),
-        ],
-        start_node='greeting'
-    )
-    basic_questions = DirectedGraph(
-        name='intro',
-        nodes=[
-            Node(
-                name='ask name',
-                content="What's your name?",
-                options='Okay',
-                message_type=Message.Type.DIRECT_INPUT,
-                result_db_key='user_name',
-                result_type=str,
-                tests=lambda x: len(x) > 1,
-                error_message='Enter something with at least two letters',
-                is_confirm=True,
-                text_populator=text_populator,
-                transitions='ask age'
-            ),
-            Node(
-                name='ask age',
-                content="Alright, {'db': '%s'}, how old are you?" % state_db.Keys.USER_NAME,
-                options='years_old',
-                message_type='direct input',
-                result_type=float,
-                result_db_key='user_age',
-                tests=[
-                    lambda x: x >= 0,
-                    lambda x: x <= 200,
-                ],
-                error_message='Enter a number between 0 and 200',
-                text_populator=text_populator,
-                transitions='how are they'
-            ),
-            Node(
-                name='how are they',
-                content='How are you?',
-                options=['Good', 'Okay', 'Bad'],
-                message_type=Message.Type.MULTIPLE_CHOICE,
-                text_populator=text_populator,
-                transitions=['exit'],
-            ),
-        ],
-        start_node='ask name'
-    )
-    psych_question = DirectedGraph(
-        name='questions',
-        nodes=[
-            Node(
-                name='psych question',
-                content=(
-                        "How do you feel about the following statement? " +
-                        "'{'var': 'question', 'index': " +
-                        "'{'db': '%s', 'post-op': 'increment'}'}'" % state_db.Keys.PSYCH_QUESTION_INDEX
-                ),
-                options=[
-                    'Strongly agree',
-                    'Agree',
-                    'Neutral',
-                    'disagree',
-                    'Strongly disagree',
-                ],
-                message_type=Message.Type.MULTIPLE_CHOICE,
-                result_db_key=state_db.Keys.PSYCH_QUESTION_ANSWERS,
-                is_append_result=True,
-                text_populator=text_populator,
-                transitions='exit',
-            ),
-        ],
-        start_node='psych question'
-    )
-    closing = DirectedGraph(
-        name='closing',
-        nodes=[
-            Node(
-                name='closing',
-                content="Bye",
-                options=['Bye', 'See ya!'],
-                message_type=Message.Type.MULTIPLE_CHOICE,
-                result_type=str,
-                text_populator=text_populator,
-                transitions='exit'
-            ),
-        ],
-        start_node='closing'
-    )
+            options=[
+                'Strongly agree',
+                'Agree',
+                'Neutral',
+                'disagree',
+                'Strongly disagree',
+            ],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            result_db_key=state_db.Keys.PSYCH_QUESTION_ANSWERS,
+            is_append_result=True,
+            text_populator=text_populator,
+        )
+        when_question = Message(
+            content="When will you walk today?",
+            options='is when',
+            message_type=Message.Type.DIRECT_INPUT,
+            result_db_key=state_db.Keys.WALK_TIME,
+            result_type=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            tests=[
+                lambda x: datetime.datetime.now().time() < x < state_db.get(state_db.Keys.PM_CHECKIN_TIME),
+            ],
+            error_message="Please pick a time after now and before our evening checkin",
+            is_confirm=True,
+            text_populator=text_populator,
+        )
+        where_question = Message(
+            content="Where will you walk today?",
+            options=state_db.get(state_db.Keys.WALK_PLACES),
+            message_type=Message.Type.DIRECT_INPUT,
+            result_db_key=state_db.Keys.WALK_PLACES,
+            is_append_result=True,
+            result_type=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            tests=[
+                lambda x: datetime.datetime.now().time() < x < state_db.get(state_db.Keys.PM_CHECKIN_TIME),
+            ],
+            error_message="Please pick a time after now and before our evening checkin",
+            is_confirm=True,
+            text_populator=text_populator,
+        )
 
 
 if __name__ == '__main__':
@@ -125,14 +101,18 @@ if __name__ == '__main__':
     from interaction_engine.planner import MessagerPlanner
     from interaction_engine.interfaces import TerminalInterface
 
-    graphs_ = [AmCheckin.greeting, AmCheckin.basic_questions, AmCheckin.psych_question, AmCheckin.closing]
+    graphs_ = [
+        AmCheckin.greeting,
+        AmCheckin.basic_questions,
+        AmCheckin.big_5_question,
+        AmCheckin.closing]
 
     # Create a plan
     plan_ = MessagerPlanner(graphs_)
     plan_.insert(AmCheckin.greeting)
     plan_.insert(AmCheckin.basic_questions)
     for _ in range(3):
-        plan_.insert(AmCheckin.psych_question)
+        plan_.insert(AmCheckin.big_5_question)
     plan_.insert(AmCheckin.closing)
 
     ie = InteractionEngine(TerminalInterface(state_db), plan_, graphs_)

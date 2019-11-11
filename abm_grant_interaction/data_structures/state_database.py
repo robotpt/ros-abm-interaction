@@ -12,6 +12,8 @@ class StateDb(PickledDatabase):
         FIRST_MEETING = 'first_meeting'
         AM_CHECKIN_TIME = 'am_checkin_time'
         PM_CHECKIN_TIME = 'pm_checkin_time'
+        WALK_TIME = 'walk_time'
+        WALK_PLACES = 'walk_places'
         BKT = 'bkt'
         STEPS_ACTUAL_RECORD = 'steps_actual_record'
         STEPS_GOAL_RECORD = 'steps_goal_record'
@@ -52,6 +54,14 @@ class StateDb(PickledDatabase):
         self.create_key_if_not_exists(
             StateDb.Keys.PM_CHECKIN_TIME,
             tests=lambda x: type(x) is datetime.time
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.WALK_TIME,
+            tests=lambda x: type(x) is datetime.time
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.WALK_PLACES,
+            ['park', 'neighborhood', 'inside']
         )
         self.create_key_if_not_exists(
             StateDb.Keys.BKT,
