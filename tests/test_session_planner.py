@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from abm_grant_interaction.goal_setter import SessionPlanner
+from abm_grant_interaction.goal_setter.session_planner import SessionPlanner
 
 
 class TestSessionPlanner(unittest.TestCase):

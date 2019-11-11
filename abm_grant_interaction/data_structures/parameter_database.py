@@ -12,6 +12,9 @@ class ParameterDb(PickledDatabase):
         CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK = \
             'consecutive_minutes_inactive_before_breaking_activity_streak'
         INACTIVE_INTERACTION_TIMEOUT_SECONDS = 'inactive_interaction_timeout_seconds'
+        WEEKS_WITH_ROBOT = 'weeks_with_robot'
+        FINAL_STEPS_GOAL = 'final_steps_goal'
+        MIN_WEEKLY_STEPS_GOAL = 'min_weekly_steps_goal'
         MINS_BEFORE_WARNING_ABOUT_FITBIT_NOT_SYNCING = \
             'minutess_before_warning_about_fitbit_not_syncing'
         FITBIT_PULL_RATE_MINS = 'fitbit_pull_rate_minutes'
@@ -32,6 +35,21 @@ class ParameterDb(PickledDatabase):
             lambda x: x >= 0,
         ]
 
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.FINAL_STEPS_GOAL,
+            10000,
+            tests=check_non_negative_int
+        )
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.MIN_WEEKLY_STEPS_GOAL,
+            2000,
+            tests=check_non_negative_int
+        )
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.WEEKS_WITH_ROBOT,
+            6,
+            tests=check_non_negative_int
+        )
         self.create_key_if_not_exists(
             ParameterDb.Keys.MAX_NUM_QUESTIONS,
             3,

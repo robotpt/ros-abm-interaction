@@ -16,7 +16,10 @@ class StateDb(PickledDatabase):
         STEPS_ACTUAL_RECORD = 'steps_actual_record'
         STEPS_GOAL_RECORD = 'steps_goal_record'
         IS_MET_GOAL_RECORD = 'is_met_goal_record'
+        SUGGESTED_STEPS_TODAY = 'suggested_steps_today'
         STEPS_TODAY = 'steps_today'
+        STEPS_THIS_WEEK = 'steps_this_week'
+        STEPS_LAST_WEEK = 'steps_last_week'
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
         DAY_OFF = 'day_off'
         PSYCH_QUESTION_INDEX = 'psych_question_index'
@@ -64,7 +67,19 @@ class StateDb(PickledDatabase):
             StateDb.Keys.IS_MET_GOAL_RECORD,
         )
         self.create_key_if_not_exists(
+            StateDb.Keys.SUGGESTED_STEPS_TODAY,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
             StateDb.Keys.STEPS_TODAY,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.STEPS_THIS_WEEK,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.STEPS_LAST_WEEK,
             tests=lambda x: math_tools.is_int(x),
         )
         self.create_key_if_not_exists(
@@ -73,10 +88,6 @@ class StateDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             StateDb.Keys.DAY_OFF,
-            tests=[
-                lambda x: math_tools.is_int(x),
-                lambda x: 0 <= x < 7,
-            ]
         )
         self.create_key_if_not_exists(
             StateDb.Keys.PSYCH_QUESTION_INDEX,
