@@ -7,6 +7,7 @@ class ParameterDb(PickledDatabase):
 
     class Keys:
         MAX_NUM_QUESTIONS = 'max_number_of_questions'
+        NUM_WHERE_OPTIONS = 'number_of_where_options'
         STEPS_PER_MINUTE_FOR_ACTIVE = 'steps_per_minute_for_active'
         ACTIVE_MINS_TO_REGISTER_ACTIVITY = 'active_minutes_to_register_activity'
         CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK = \
@@ -52,6 +53,11 @@ class ParameterDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             ParameterDb.Keys.MAX_NUM_QUESTIONS,
+            3,
+            tests=check_non_negative_int
+        )
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.NUM_WHERE_OPTIONS,
             3,
             tests=check_non_negative_int
         )

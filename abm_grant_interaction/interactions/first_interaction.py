@@ -26,6 +26,7 @@ class Options:
             result_db_key=state_db.Keys.AM_CHECKIN_TIME,
             result_type=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
             tests=lambda x: x.hour < 12,
+            error_message="Please pick a time in the morning",
             is_confirm=True,
             text_populator=text_populator,
         )
@@ -33,9 +34,10 @@ class Options:
             content="When should we checkin in the evening?",
             options='is when',
             message_type=Message.Type.DIRECT_INPUT,
-            result_db_key=state_db.Keys.AM_CHECKIN_TIME,
+            result_db_key=state_db.Keys.PM_CHECKIN_TIME,
             result_type=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
             tests=lambda x: x.hour >= 12,
+            error_message="Please pick a time after noon",
             is_confirm=True,
             text_populator=text_populator,
         )
@@ -167,21 +169,23 @@ class FirstMeeting:
             Node(
                 name='set steps goal',
                 content=(
-                        "The last thing to do is to set your steps goal for today. " +
-                        "You did {'db': '%s'} steps last week. " % state_db.Keys.STEPS_LAST_WEEK +
-                        "To work towards your goal of %s steps in %s weeks, " % (
-                            param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
-                            param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)
-                        ) +
-                        "I suggest that you do {'db': '%s'} steps today. " % state_db.Keys.SUGGESTED_STEPS_TODAY +
-                        "How many steps would you like to do today?"
+                    lambda:
+                    "The last thing to do is to set your steps goal for today. " +
+                    "You did {'db': '%s'} steps last week. " % state_db.Keys.STEPS_LAST_WEEK +
+                    "To work towards your goal of %s steps in %s weeks, " % (
+                        param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
+                        param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)
+                    ) +
+                    "I suggest that you do {'db': '%s'} steps today. " % state_db.Keys.SUGGESTED_STEPS_TODAY +
+                    "How many steps would you like to do today?"
                 ),
                 options='steps',
                 message_type=Message.Type.DIRECT_INPUT,
                 result_type=int,
                 result_db_key=state_db.Keys.STEPS_GOAL_RECORD,
-                tests=lambda x: x >= param_db.get(param_db.Keys.MIN_WEEKLY_STEPS_GOAL)/6,
+                tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
                 is_append_result=True,
+                error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
                 text_populator=text_populator,
                 transitions='ask help',
     ),
