@@ -14,6 +14,9 @@ class StateDb(PickledDatabase):
         PM_CHECKIN_TIME = 'pm_checkin_time'
         WALK_TIME = 'walk_time'
         WALK_PLACES = 'walk_places'
+        HOW_BUSY = 'how_busy'
+        HOW_REMEMBER = 'how_remember'
+        HOW_MOTIVATE = 'how_motivate'
         BKT = 'bkt'
         STEPS_ACTUAL_RECORD = 'steps_actual_record'
         STEPS_GOAL_RECORD = 'steps_goal_record'
@@ -62,6 +65,30 @@ class StateDb(PickledDatabase):
         self.create_key_if_not_exists(
             StateDb.Keys.WALK_PLACES,
             ['park', 'neighborhood', 'inside']
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.HOW_BUSY,
+            [
+                'Plan with my calendar',
+                'Walk earlier or later in the day',
+                'Walk during meetings',
+            ]
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.HOW_MOTIVATE,
+            [
+                'Think of the health benefits',
+                'Walk with a friend',
+                'Listen to music while walking',
+            ]
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.HOW_REMEMBER,
+            [
+                'Walk before or after lunch',
+                'Set an alarm',
+                'Put it on my calendar or todo list',
+            ]
         )
         self.create_key_if_not_exists(
             StateDb.Keys.BKT,

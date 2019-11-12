@@ -87,16 +87,32 @@ class AmCheckin:
             message_type=Message.Type.DIRECT_INPUT,
             result_db_key=state_db.Keys.WALK_TIME,
             result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
-            tests=lambda x: datetime.datetime.now().time() < x < state_db.get(state_db.Keys.PM_CHECKIN_TIME),
+            tests=lambda x: state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME),
             error_message="Please pick a time after now and before our evening checkin",
             is_confirm=True,
             text_populator=text_populator,
         )
+        set_goal = Message(
+            content=(
+                lambda:
+                "I suggest that you do {'db': '%s'} steps today. " % state_db.Keys.SUGGESTED_STEPS_TODAY +
+                "How many steps would you like to do today?"
+            ),
+            options='steps',
+            message_type=Message.Type.DIRECT_INPUT,
+            result_convert_from_str_fn=int,
+            result_db_key=state_db.Keys.STEPS_GOAL_RECORD,
+            tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
+            is_append_result=True,
+            error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+            text_populator=text_populator,
+        )
 
     where_graph = most_recent_options_graph(
+        "ask where",
         "Where do you want to walk?",
         options=lambda: state_db.get(state_db.Keys.WALK_PLACES),
-        max_num_options=param_db.get(param_db.Keys.NUM_WHERE_OPTIONS),
+        max_num_options=param_db.get(param_db.Keys.NUM_OPTIONS_TO_DISPLAY),
         save_db_key=state_db.Keys.WALK_PLACES,
         text_populator=text_populator,
         new_entry_text_choice='Somewhere else',
@@ -106,14 +122,35 @@ class AmCheckin:
         new_entry_error_message="Please write more than one letter"
     )
     how_remember_graph = most_recent_options_graph(
-        "How will you remember to walk?",
-        options=lambda: state_db.get(state_db.Keys.WALK_PLACES),
-        max_num_options=param_db.get(param_db.Keys.NUM_WHERE_OPTIONS),
-        save_db_key=state_db.Keys.WALK_PLACES,
+        "how_remember",
+        "{how_question_forget}",
+        options=lambda: state_db.get(state_db.Keys.HOW_REMEMBER),
+        max_num_options=param_db.get(param_db.Keys.NUM_OPTIONS_TO_DISPLAY),
+        save_db_key=state_db.Keys.HOW_REMEMBER,
         text_populator=text_populator,
-        new_entry_text_choice='Somewhere else',
-        new_entry_message="So where will you walk?",
-        new_entry_options="Is where",
+        new_entry_text_choice='Something else',
+        tests=lambda x: len(x) > 1,
+        new_entry_error_message="Please write more than one letter"
+    )
+    how_busy_graph = most_recent_options_graph(
+        "how_busy",
+        "{how_question_busy}",
+        options=lambda: state_db.get(state_db.Keys.HOW_BUSY),
+        max_num_options=param_db.get(param_db.Keys.NUM_OPTIONS_TO_DISPLAY),
+        save_db_key=state_db.Keys.HOW_BUSY,
+        text_populator=text_populator,
+        new_entry_text_choice='Something else',
+        tests=lambda x: len(x) > 1,
+        new_entry_error_message="Please write more than one letter"
+    )
+    how_motivated_graph = most_recent_options_graph(
+        "how_motivated",
+        "{how_question_not_motivated}",
+        options=lambda: state_db.get(state_db.Keys.HOW_MOTIVATE),
+        max_num_options=param_db.get(param_db.Keys.NUM_OPTIONS_TO_DISPLAY),
+        save_db_key=state_db.Keys.HOW_MOTIVATE,
+        text_populator=text_populator,
+        new_entry_text_choice='Something else',
         tests=lambda x: len(x) > 1,
         new_entry_error_message="Please write more than one letter"
     )
@@ -125,19 +162,31 @@ if __name__ == '__main__':
     from interaction_engine.planner import MessagerPlanner
     from interaction_engine.interfaces import TerminalInterface
 
+    state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, 600)
+    state_db.set(state_db.Keys.AM_CHECKIN_TIME, datetime.time(8, 0))
+    state_db.set(state_db.Keys.PM_CHECKIN_TIME, datetime.time(18, 0))
+
     graphs_ = [
         AmCheckin.Messages.greeting,
         AmCheckin.Messages.closing,
         AmCheckin.Messages.big_5_question,
         AmCheckin.Messages.when_question,
+        AmCheckin.Messages.set_goal,
         AmCheckin.where_graph,
+        AmCheckin.how_busy_graph,
+        AmCheckin.how_motivated_graph,
+        AmCheckin.how_remember_graph,
     ]
 
     # Create a plan
     plan_ = MessagerPlanner(graphs_)
-    plan_.insert(AmCheckin.where_graph)
     plan_.insert(AmCheckin.Messages.greeting)
+    plan_.insert(AmCheckin.Messages.set_goal)
+    plan_.insert(AmCheckin.where_graph)
     plan_.insert(AmCheckin.Messages.when_question)
+    plan_.insert(AmCheckin.how_busy_graph)
+    plan_.insert(AmCheckin.how_remember_graph)
+    plan_.insert(AmCheckin.how_motivated_graph)
     for _ in range(3):
         plan_.insert(AmCheckin.Messages.big_5_question)
     plan_.insert(AmCheckin.Messages.closing)
