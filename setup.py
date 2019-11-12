@@ -25,8 +25,9 @@ REQUIRED = [
     'hmmlearn',
     'fitbit-reader',
     'pickle_database',
+    'interaction-engine',
     'robotpt_common_utils',
-    'yaml',
+    'pyyaml',
     # 'requests', 'maya', 'records',
 ]
 
