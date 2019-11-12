@@ -1,4 +1,4 @@
-from interaction_engine.messager import Message, Node, DirectedGraph
+from interaction_engine.messager import Message, Node, DirectedGraph, most_recent_options_graph
 from abm_grant_interaction import state_db, param_db, text_populator
 from robotpt_common_utils import lists
 
@@ -19,7 +19,6 @@ def _get_last_n_list(list_, n, exclude_values=None):
     return out
 
 
-
 class Common:
 
     class Nodes:
@@ -28,7 +27,7 @@ class Common:
             content="{greeting_morning}",
             options="{greeting_morning}",
             message_type=Message.Type.MULTIPLE_CHOICE,
-            result_type=str,
+            result_convert_from_str_fn=str,
             text_populator=text_populator,
             transitions='exit'
         )
@@ -37,7 +36,7 @@ class Common:
             content="{greeting}",
             options="{greeting}",
             message_type=Message.Type.MULTIPLE_CHOICE,
-            result_type=str,
+            result_convert_from_str_fn=str,
             text_populator=text_populator,
             transitions='exit'
         )
@@ -51,17 +50,17 @@ class AmCheckin:
     class Messages:
 
         greeting = Message(
-            content="{greeting}",
-            options="{greeting}",
+            content="{greeting_morning}",
+            options="{greeting_morning}",
             message_type=Message.Type.MULTIPLE_CHOICE,
-            result_type=str,
+            result_convert_from_str_fn=str,
             text_populator=text_populator,
         )
         closing = Message(
             content="Bye",
             options=['Bye', 'See ya!'],
             message_type=Message.Type.MULTIPLE_CHOICE,
-            result_type=str,
+            result_convert_from_str_fn=str,
             text_populator=text_populator,
         )
         big_5_question = Message(
@@ -87,47 +86,36 @@ class AmCheckin:
             options='is when',
             message_type=Message.Type.DIRECT_INPUT,
             result_db_key=state_db.Keys.WALK_TIME,
-            result_type=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
             tests=lambda x: datetime.datetime.now().time() < x < state_db.get(state_db.Keys.PM_CHECKIN_TIME),
             error_message="Please pick a time after now and before our evening checkin",
             is_confirm=True,
             text_populator=text_populator,
         )
-    where_graph = DirectedGraph(
-        name='where',
-        start_node='ask',
-        nodes=[
-            Node(
-                name='ask',
-                content="Where will you walk today?",
-                options=(
-                    lambda:
-                    _get_last_n_list(
-                        state_db.get(state_db.Keys.WALK_PLACES),
-                        param_db.get(param_db.Keys.NUM_WHERE_OPTIONS),
-                        'Somewhere else'
-                    ) + ["Somewhere else"]
-                ),
-                message_type=Message.Type.MULTIPLE_CHOICE,
-                result_db_key=state_db.Keys.WALK_PLACES,
-                is_append_result=True,
-                text_populator=text_populator,
-                transitions=['exit']*param_db.get(param_db.Keys.NUM_WHERE_OPTIONS) + ["enter where"]
-            ),
-            Node(
-                name='enter where',
-                content="Alright, so where will you walk?",
-                options='is where',
-                message_type=Message.Type.DIRECT_INPUT,
-                result_db_key=state_db.Keys.WALK_PLACES,
-                is_append_result=True,
-                result_type=str,
-                tests=lambda x: len(x) > 1,
-                error_message="Please write more than one letter",
-                text_populator=text_populator,
-                transitions='exit',
-            )
-        ]
+
+    where_graph = most_recent_options_graph(
+        "Where do you want to walk?",
+        options=lambda: state_db.get(state_db.Keys.WALK_PLACES),
+        max_num_options=param_db.get(param_db.Keys.NUM_WHERE_OPTIONS),
+        save_db_key=state_db.Keys.WALK_PLACES,
+        text_populator=text_populator,
+        new_entry_text_choice='Somewhere else',
+        new_entry_message="So where will you walk?",
+        new_entry_options="Is where",
+        tests=lambda x: len(x) > 1,
+        new_entry_error_message="Please write more than one letter"
+    )
+    how_remember_graph = most_recent_options_graph(
+        "How will you remember to walk?",
+        options=lambda: state_db.get(state_db.Keys.WALK_PLACES),
+        max_num_options=param_db.get(param_db.Keys.NUM_WHERE_OPTIONS),
+        save_db_key=state_db.Keys.WALK_PLACES,
+        text_populator=text_populator,
+        new_entry_text_choice='Somewhere else',
+        new_entry_message="So where will you walk?",
+        new_entry_options="Is where",
+        tests=lambda x: len(x) > 1,
+        new_entry_error_message="Please write more than one letter"
     )
 
 
@@ -138,6 +126,9 @@ if __name__ == '__main__':
     from interaction_engine.interfaces import TerminalInterface
 
     graphs_ = [
+        AmCheckin.Messages.greeting,
+        AmCheckin.Messages.closing,
+        AmCheckin.Messages.big_5_question,
         AmCheckin.Messages.when_question,
         AmCheckin.where_graph,
     ]
@@ -145,18 +136,15 @@ if __name__ == '__main__':
     # Create a plan
     plan_ = MessagerPlanner(graphs_)
     plan_.insert(AmCheckin.where_graph)
-    plan_.insert(AmCheckin.where_graph)
-    plan_.insert(AmCheckin.where_graph)
-    plan_.insert(AmCheckin.where_graph)
-    if 0:
-        plan_.insert(AmCheckin.greeting)
-        plan_.insert(AmCheckin.basic_questions)
-        for _ in range(3):
-            plan_.insert(AmCheckin.big_5_question)
-        plan_.insert(AmCheckin.closing)
+    plan_.insert(AmCheckin.Messages.greeting)
+    plan_.insert(AmCheckin.Messages.when_question)
+    for _ in range(3):
+        plan_.insert(AmCheckin.Messages.big_5_question)
+    plan_.insert(AmCheckin.Messages.closing)
 
     ie = InteractionEngine(TerminalInterface(state_db), plan_, graphs_)
     ie.run()
 
     print(state_db)
     print(param_db)
+
