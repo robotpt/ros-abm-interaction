@@ -1,48 +1,7 @@
-from interaction_engine.messager import Message, Node, DirectedGraph, most_recent_options_graph
+from interaction_engine.messager import Message, most_recent_options_graph
 from abm_grant_interaction import state_db, param_db, text_populator
-from robotpt_common_utils import lists
 
 import datetime
-
-
-def _get_last_n_list(list_, n, exclude_values=None):
-    exclude_values = lists.make_sure_is_iterable(exclude_values)
-    list_ = lists.remove_repeats(list_, is_remove_from_front=False)
-    out = []
-    idx = len(list_)-1
-    while len(out) < n and idx >= 0:
-        value = list_[idx]
-        if value not in exclude_values:
-            out.append(value)
-        idx -= 1
-
-    return out
-
-
-class Common:
-
-    class Nodes:
-        greeting_morning = Node(
-            name='greeting',
-            content="{greeting_morning}",
-            options="{greeting_morning}",
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            result_convert_from_str_fn=str,
-            text_populator=text_populator,
-            transitions='exit'
-        )
-        greeting = Node(
-            name='greeting',
-            content="{greeting}",
-            options="{greeting}",
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            result_convert_from_str_fn=str,
-            text_populator=text_populator,
-            transitions='exit'
-        )
-
-    class Graphs:
-        pass
 
 
 class AmCheckin:
@@ -87,7 +46,9 @@ class AmCheckin:
             message_type=Message.Type.DIRECT_INPUT,
             result_db_key=state_db.Keys.WALK_TIME,
             result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
-            tests=lambda x: state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME),
+            tests=lambda x: (
+                state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME)
+            ),
             error_message="Please pick a time after now and before our evening checkin",
             is_confirm=True,
             text_populator=text_populator,
@@ -104,7 +65,9 @@ class AmCheckin:
             result_db_key=state_db.Keys.STEPS_GOAL_RECORD,
             tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
             is_append_result=True,
-            error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+            error_message=(
+                "Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+            ),
             text_populator=text_populator,
         )
 
@@ -196,4 +159,3 @@ if __name__ == '__main__':
 
     print(state_db)
     print(param_db)
-
