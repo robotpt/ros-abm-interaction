@@ -18,8 +18,7 @@ class StateDb(PickledDatabase):
         HOW_REMEMBER = 'how_remember'
         HOW_MOTIVATE = 'how_motivate'
         BKT = 'bkt'
-        STEPS_ACTUAL_RECORD = 'steps_actual_record'
-        STEPS_GOAL_RECORD = 'steps_goal_record'
+        STEPS_GOAL = 'steps_goal'
         IS_MET_GOAL_RECORD = 'is_met_goal_record'
         SUGGESTED_STEPS_TODAY = 'suggested_steps_today'
         STEPS_TODAY = 'steps_today'
@@ -95,10 +94,8 @@ class StateDb(PickledDatabase):
             tests=lambda x: type(x) is Bkt
         )
         self.create_key_if_not_exists(
-            StateDb.Keys.STEPS_ACTUAL_RECORD,
-        )
-        self.create_key_if_not_exists(
-            StateDb.Keys.STEPS_GOAL_RECORD,
+            StateDb.Keys.STEPS_GOAL,
+            tests=lambda x: math_tools.is_int(x),
         )
         self.create_key_if_not_exists(
             StateDb.Keys.IS_MET_GOAL_RECORD,

@@ -2,13 +2,50 @@ Code,Text
 
 greeting,Hi
 greeting,Hello
-greeting,Hola
+greeting,Hello there.
+greeting,Hi there.
+greeting,Hiya.
+greeting,It's a pleasure to see you.
+greeting,It's great to see you.
+greeting,It's wonderful to see you.
+greeting,It’s fantastic to see you.
+greeting,Morning.
+greeting,Nice to see you.
+greeting,There you are.
+greeting,Well hello.
+greeting,Hey sweet pea.
+greeting,It's delightful to see you.
+greeting,It’s lovely to see you.
+greeting,Seeing you feels like a hug.
+greeting,Seeing you makes me smile on the inside.
+greeting,Seeing you makes my circuits skip a beat.
+greeting,What a joy to see you.
+greeting,You put the good in my afternoon.
+greeting,You're a ray of sunshine.
+greeting,Hey there.
+greeting,What’s up?
+greeting,Ahoy hoy.
+
 greeting_morning,{greeting}
 greeting_morning,Good morning
 greeting_afternoon,{greeting}
 greeting_afternoon,Good day
 greeting_afternoon,Good afternoon
 greeting_evening,Good evening
+
+goodbye,"Bye bye."
+goodbye,"Bye."
+goodbye,"Bye, I'll miss you."
+goodbye,"Enjoy your day."
+goodbye,"Good night."
+goodbye,"Goodbye."
+goodbye,"Here’s to a good day."
+goodbye,"Let's do this again soon."
+goodbye,"See you later."
+goodbye,"See you soon."
+goodbye,"You have a good day."
+goodbye,"You have a good night."
+goodbye,"Take care."
 
 nice,Nice
 nice,Great
@@ -23,10 +60,37 @@ good_job,{nice} job
 good_job,{nice} work
 good_job,{nice} going
 
-question,I am the life of the party
-question,I am always prepared
-question,I get stressed out easily
-question,I have a rich vocabulary
+affirmative_plus_button_response,Absolutely
+affirmative_plus_button_response,Definitely
+affirmative_plus_button_response,For sure
+affirmative_plus_button_response,That's great
+affirmative_plus_button_response,Yes
+affirmative_button_response,All right
+affirmative_button_response,Okay
+affirmative_button_response,Sure
+affirmative_button_response,Yes
+negative_button_response,No
+negative_button_response,No thanks
+negative_button_response,Not now
+
+Ill_try_that_button_response,I’ll definitely try that
+Ill_try_that_button_response,I’ll try that
+Ill_try_that_button_response,I’ll give that a shot
+maybe_Ill_try_button_response,I may try that
+maybe_Ill_try_button_response,Maybe I'll try that
+maybe_Ill_try_button_response,I may give that a shot
+maybe_Ill_try_button_response,I might give that a shot
+not_for_me_button_response,That’s not for me
+not_for_me_button_response,That’s not my thing
+
+transitional_statement,All right.
+transitional_statement,Alrighty.
+transitional_statement,Gotcha.
+transitional_statement,Okay.
+oops_button_response,"No. Actually, I didn’t mean that"
+oops_button_response,"Oh, I didn’t mean that"
+oops_button_response,"Oops, I didn’t mean that"
+oops_button_response,That’s not what I meant
 
 how_question_busy,{how_question_start_make_sure} are available when you plan to walk{today_or_not}?
 how_question_busy,{how_question_start_make_sure} are free when you plan to walk{today_or_not}?

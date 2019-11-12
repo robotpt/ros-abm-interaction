@@ -50,7 +50,6 @@ class AmCheckin:
                 state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME)
             ),
             error_message="Please pick a time after now and before our evening checkin",
-            is_confirm=True,
             text_populator=text_populator,
         )
         set_goal = Message(
@@ -62,9 +61,8 @@ class AmCheckin:
             options='steps',
             message_type=Message.Type.DIRECT_INPUT,
             result_convert_from_str_fn=int,
-            result_db_key=state_db.Keys.STEPS_GOAL_RECORD,
+            result_db_key=state_db.Keys.STEPS_GOAL,
             tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
-            is_append_result=True,
             error_message=(
                 "Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
             ),

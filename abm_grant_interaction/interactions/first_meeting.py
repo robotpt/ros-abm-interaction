@@ -1,52 +1,7 @@
 from interaction_engine.messager import Message, Node, DirectedGraph
 from abm_grant_interaction import state_db, param_db, text_populator
 
-import datetime
-
-
-class Options:
-
-    class Messages:
-        ask_name = Message(
-            content="What's your name?",
-            options='Okay',
-            message_type=Message.Type.DIRECT_INPUT,
-            result_db_key=state_db.Keys.USER_NAME,
-            result_convert_from_str_fn=str,
-            tests=lambda x: len(x) > 1,
-            error_message='Enter something with at least two letters',
-            is_confirm=True,
-            text_populator=text_populator,
-        )
-        set_am_checkin = Message(
-            content="When would you like to checkin in the morning?",
-            options='is when',
-            message_type=Message.Type.DIRECT_INPUT,
-            result_db_key=state_db.Keys.AM_CHECKIN_TIME,
-            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
-            tests=lambda x: x.hour < 12,
-            error_message="Please pick a time in the morning",
-            is_confirm=True,
-            text_populator=text_populator,
-        )
-        set_pm_checkin = Message(
-            content="When should we checkin in the evening?",
-            options='is when',
-            message_type=Message.Type.DIRECT_INPUT,
-            result_db_key=state_db.Keys.PM_CHECKIN_TIME,
-            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
-            tests=lambda x: x.hour >= 12,
-            error_message="Please pick a time after noon",
-            is_confirm=True,
-            text_populator=text_populator,
-        )
-        set_day_off = Message(
-            content="Would you like a day off",
-            options=['No', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            result_db_key=state_db.Keys.DAY_OFF,
-            text_populator=text_populator,
-        )
+from abm_grant_interaction.interactions.options import Options
 
 
 class FirstMeeting:
@@ -117,7 +72,7 @@ class FirstMeeting:
         nodes=[
             Node(
                 name='ask name',
-                message=Options.Messages.ask_name,
+                message=Options.Messages.set_name,
                 options='Okay',
                 transitions='introduce self'
             ),
@@ -153,17 +108,35 @@ class FirstMeeting:
             Node(
                 name='set am checkin',
                 message=Options.Messages.set_am_checkin,
-                transitions='set pm checkin'
+                transitions='confirm am checkin',
+            ),
+            Node(
+                name='confirm am checkin',
+                message=Options.Messages.confirm_am_checkin,
+                options=['{affirmative_button_response}', '{oops_button_response}'],
+                transitions=['set pm checkin', 'set am checkin'],
             ),
             Node(
                 name='set pm checkin',
                 message=Options.Messages.set_pm_checkin,
-                transitions='set day off'
+                transitions='confirm pm checkin',
+            ),
+            Node(
+                name='confirm pm checkin',
+                message=Options.Messages.confirm_pm_checkin,
+                options=['{affirmative_button_response}', '{oops_button_response}'],
+                transitions=['set day off', 'set pm checkin'],
             ),
             Node(
                 name='set day off',
                 message=Options.Messages.set_day_off,
-                transitions='set steps goal'
+                transitions='confirm day off',
+            ),
+            Node(
+                name='confirm day off',
+                message=Options.Messages.confirm_day_off,
+                options=['{affirmative_button_response}', '{oops_button_response}'],
+                transitions=['set steps goal', 'set day off'],
             ),
             Node(
                 name='set steps goal',
@@ -181,9 +154,8 @@ class FirstMeeting:
                 options='steps',
                 message_type=Message.Type.DIRECT_INPUT,
                 result_convert_from_str_fn=int,
-                result_db_key=state_db.Keys.STEPS_GOAL_RECORD,
+                result_db_key=state_db.Keys.STEPS_GOAL,
                 tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
-                is_append_result=True,
                 error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
                 text_populator=text_populator,
                 transitions='ask help',
