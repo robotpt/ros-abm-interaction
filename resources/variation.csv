@@ -76,6 +76,8 @@ affirmative_button_response,All right
 affirmative_button_response,Okay
 affirmative_button_response,Sure
 affirmative_button_response,Yes
+okay_button_response,All right
+okay_button_response,Okay
 negative_button_response,No
 negative_button_response,No thanks
 negative_button_response,Not now

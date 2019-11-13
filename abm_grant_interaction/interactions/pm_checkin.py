@@ -51,7 +51,7 @@ class PmCheckin:
                     "{too_bad_didnt_reach_steps_goal}"
                 ),
                 options=[
-                    'Okay',
+                    '{okay_button_response}',
                     'Oops',
                     'About that...'
                 ],

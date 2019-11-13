@@ -17,3 +17,13 @@ class Common:
             message_type=Message.Type.MULTIPLE_CHOICE,
             text_populator=text_populator,
         )
+        missed_checkin = Message(
+            content="We missed seeing each other. Let's not miss any more checkins.",
+            options=[
+                "{apologize_failure}",
+                "{neutral_failure}",
+                "{okay_button_response}",
+            ],
+            message_type = Message.Type.MULTIPLE_CHOICE,
+            text_populator = text_populator,
+        )
