@@ -14,6 +14,7 @@ class StateDb(PickledDatabase):
         PM_CHECKIN_TIME = 'pm_checkin_time'
         WALK_TIME = 'walk_time'
         WALK_PLACES = 'walk_places'
+        FAIL_WHY = 'why_failed'
         HOW_BUSY = 'how_busy'
         HOW_REMEMBER = 'how_remember'
         HOW_MOTIVATE = 'how_motivate'
@@ -72,6 +73,9 @@ class StateDb(PickledDatabase):
                 'Walk earlier or later in the day',
                 'Walk during meetings',
             ]
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.FAIL_WHY,
         )
         self.create_key_if_not_exists(
             StateDb.Keys.HOW_MOTIVATE,

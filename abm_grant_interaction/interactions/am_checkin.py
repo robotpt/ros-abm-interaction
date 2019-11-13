@@ -41,7 +41,7 @@ class AmCheckin:
             text_populator=text_populator,
         )
         when_question = Message(
-            content="When will you walk today?",
+            content="{when_question}",
             options='is when',
             message_type=Message.Type.DIRECT_INPUT,
             result_db_key=state_db.Keys.WALK_TIME,
@@ -71,7 +71,7 @@ class AmCheckin:
 
     where_graph = most_recent_options_graph(
         "ask where",
-        "Where do you want to walk?",
+        "{where_question}",
         options=lambda: state_db.get(state_db.Keys.WALK_PLACES),
         max_num_options=param_db.get(param_db.Keys.NUM_OPTIONS_TO_DISPLAY),
         save_db_key=state_db.Keys.WALK_PLACES,

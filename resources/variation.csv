@@ -60,6 +60,13 @@ good_job,{nice} job
 good_job,{nice} work
 good_job,{nice} going
 
+exclamation_or_period,!
+exclamation_or_period,.
+
+thank_you,Thank you very much.
+thank_you,Thank you.
+thank_you,Thanks.
+
 affirmative_plus_button_response,Absolutely
 affirmative_plus_button_response,Definitely
 affirmative_plus_button_response,For sure
@@ -72,6 +79,14 @@ affirmative_button_response,Yes
 negative_button_response,No
 negative_button_response,No thanks
 negative_button_response,Not now
+
+thanks_means_a_lot,Thanks!
+thanks_means_a_lot,Thanks. That means a lot.
+thanks_means_a_lot,Thanks. Your opinion means a lot to me.
+thanks_means_a_lot,Wow! Thanks that makes my day.
+
+thanks,Thank you
+thanks,Thanks
 
 Ill_try_that_button_response,I’ll definitely try that
 Ill_try_that_button_response,I’ll try that
@@ -91,6 +106,63 @@ oops_button_response,"No. Actually, I didn’t mean that"
 oops_button_response,"Oh, I didn’t mean that"
 oops_button_response,"Oops, I didn’t mean that"
 oops_button_response,That’s not what I meant
+
+steps_goal,steps goal
+steps_goal,walking goal
+
+congratulations_steps_goal,"{nice}, you met your {steps_goal}{today_or_not}{exclamation_or_period}"
+congratulations_steps_goal,"{nice}, you reached your {steps_goal}{today_or_not}{exclamation_or_period}"
+congratulations_steps_goal,{good_job} reaching your {steps_goal}{today_or_not}{exclamation_or_period}
+congratulations_steps_goal,{good_job} meeting your {steps_goal}{today_or_not}{exclamation_or_period}
+congrats_meeting_goal,{good_job} meeting *nod*your goal{today_or_not}!
+congrats_meeting_goal,{good_job} with your goal *nod*your goal{today_or_not}!
+congrats_meeting_goal,{congrats} on meeting your goal *nod*your goal{today_or_not}!
+congrats,Congratulations
+congrats,Congrats
+
+happy_praise,You certainly did well today.
+happy_praise,Keep it up!
+happy_praise,I'm proud of the way you worked today.
+happy_praise,That's the way!
+happy_praise,Keep up the good work.
+happy_praise,Nothing can stop you now.
+happy_praise,You're really going to town.
+happy_praise,Now that's what I call a fine job.
+happy_praise,Way to go!
+
+your_goal_is_to_do,Your target is to do
+your_goal_is_to_do,Your goal is to do
+your_goal_is_to_do,Your plan is to do
+your_goal_is_to_do,You plan to do
+your_goal_was_to_do,Your target was to do
+your_goal_was_to_do,Your goal was to do
+your_goal_was_to_do,Your plan was to do
+your_goal_was_to_do,You plan to do
+your_goal_was_to_do,You planned to do
+your_goal_was_to_do,You wanted to do
+
+too_bad_didnt_reach_steps_goal,"{too_bad}, you didn't meet your {steps_goal} today."
+too_bad_didnt_reach_steps_goal,"{too_bad}, you didn't reach the {steps_goal} today."
+too_bad_didnt_reach_steps_goal,You didn't reach your {steps_goal} today.
+too_bad_didnt_reach_steps_goal,You did't walk enough today to meet your {steps_goal}.
+too_bad_didnt_reach_steps_goal,"{too_bad}, you did't walk enough today to meet your {steps_goal}."
+too_bad,Too bad
+too_bad,Unfortunately
+too_bad,Sadly
+
+encourage_after_fail,I'm sure that you can do it next time.
+encourage_after_fail,We'll try again next time.
+encourage_after_fail,Let's do better next time.
+encourage_after_fail,You can meet your goal next time.
+encourage_after_fail,Let's try again next time.
+question_failed_goal,How come you didn't meet your {steps_goal} today?
+question_failed_goal,Why do you think you didn't reach your {steps_goal} today?
+positive_failure,I'll do better next time!
+positive_failure,I'll make it next time!
+neutral_failure,Tomorrow will be better
+neutral_failure,Alright
+apologize_failure,"Sorry, I'll try tomorrow"
+
 
 how_question_busy,{how_question_start_make_sure} are available when you plan to walk{today_or_not}?
 how_question_busy,{how_question_start_make_sure} are free when you plan to walk{today_or_not}?
