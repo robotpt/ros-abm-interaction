@@ -37,6 +37,10 @@ class StateDb(PickledDatabase):
         super().__init__(database_path=database_path)
         self._build()
 
+    def reset(self):
+        super().clear_database()
+        self._build()
+
     def _build(self):
 
         self.create_key_if_not_exists(
