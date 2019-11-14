@@ -70,4 +70,3 @@ _variety_populator = _VarietyPopulator(
 )
 _database_populator = _DatabasePopulator(state_db)
 text_populator = _TextPopulator(_variety_populator, _database_populator)
-
