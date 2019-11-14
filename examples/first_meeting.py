@@ -6,13 +6,13 @@ from interaction_engine import InteractionEngine
 from interaction_engine.planner import MessagerPlanner
 from interaction_engine.interfaces import TerminalInterface
 
-graphs_ = [
-    FirstMeeting.first_questions
+possible_plans = [
+    FirstMeeting.first_meeting
 ]
 
 # Create a plan
-plan_ = MessagerPlanner(graphs_)
-plan_.insert(FirstMeeting.first_questions)
+plan_ = MessagerPlanner(possible_plans)
+plan_.insert(FirstMeeting.first_meeting)
 
 steps_last_week = 3000
 goal_calc = GoalCalculator()
@@ -22,7 +22,7 @@ day_goal = goal_calc.get_day_goal(week_goal, 0, 7)
 state_db.set(state_db.Keys.STEPS_LAST_WEEK, steps_last_week)
 state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, day_goal)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, graphs_)
+ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)

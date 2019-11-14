@@ -8,20 +8,6 @@ class AmCheckin:
 
     class Messages:
 
-        greeting = Message(
-            content="{greeting_morning}",
-            options="{greeting_morning}",
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            result_convert_from_str_fn=str,
-            text_populator=text_populator,
-        )
-        closing = Message(
-            content="Bye",
-            options=['Bye', 'See ya!'],
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            result_convert_from_str_fn=str,
-            text_populator=text_populator,
-        )
         big_5_question = Message(
             content=(
                     "How do you feel about the following statement? " +
@@ -54,7 +40,6 @@ class AmCheckin:
         )
         set_goal = Message(
             content=(
-                lambda:
                 "I suggest that you do {'db': '%s'} steps today. " % state_db.Keys.SUGGESTED_STEPS_TODAY +
                 "How many steps would you like to do today?"
             ),

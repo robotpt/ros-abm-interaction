@@ -15,7 +15,7 @@ state_db.set(state_db.Keys.PM_CHECKIN_TIME, datetime.time(18, 0))
 state_db.set(state_db.Keys.STEPS_TODAY, 300)
 state_db.set(state_db.Keys.STEPS_GOAL, 600)
 
-graphs_ = [
+possible_plans = [
     OffCheckin.Messages.give_status,
     Options.options,
     Common.Messages.greeting,
@@ -23,13 +23,13 @@ graphs_ = [
 ]
 
 # Create a plan
-plan_ = MessagerPlanner(graphs_)
+plan_ = MessagerPlanner(possible_plans)
 plan_.insert(Common.Messages.greeting)
 plan_.insert(OffCheckin.Messages.give_status)
 plan_.insert(Options.options)
 plan_.insert(Common.Messages.closing)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, graphs_)
+ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)

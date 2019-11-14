@@ -11,7 +11,7 @@ state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, 600)
 state_db.set(state_db.Keys.AM_CHECKIN_TIME, datetime.time(8, 0))
 state_db.set(state_db.Keys.PM_CHECKIN_TIME, datetime.time(18, 0))
 
-graphs_ = [
+possible_plans = [
     AmCheckin.Messages.greeting,
     AmCheckin.Messages.closing,
     AmCheckin.Messages.big_5_question,
@@ -24,7 +24,7 @@ graphs_ = [
 ]
 
 # Create a plan
-plan_ = MessagerPlanner(graphs_)
+plan_ = MessagerPlanner(possible_plans)
 plan_.insert(AmCheckin.Messages.greeting)
 plan_.insert(AmCheckin.Messages.set_goal)
 plan_.insert(AmCheckin.where_graph)
@@ -36,7 +36,7 @@ for _ in range(3):
     plan_.insert(AmCheckin.Messages.big_5_question)
 plan_.insert(AmCheckin.Messages.closing)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, graphs_)
+ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)

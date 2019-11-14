@@ -8,25 +8,35 @@ import datetime
 class StateDb(PickledDatabase):
 
     class Keys:
+
         USER_NAME = 'user_name'
+
         FIRST_MEETING = 'first_meeting'
+        LAST_AM_CHECKIN = 'last_am_checkin'
+        LAST_PM_CHECKIN = 'last_pm_checkin'
+        CURRENT_DATETIME = 'current_datetime'
+
         AM_CHECKIN_TIME = 'am_checkin_time'
         PM_CHECKIN_TIME = 'pm_checkin_time'
+        DAY_OFF = 'day_off'
+
         WALK_TIME = 'walk_time'
         WALK_PLACES = 'walk_places'
         FAIL_WHY = 'why_failed'
         HOW_BUSY = 'how_busy'
         HOW_REMEMBER = 'how_remember'
         HOW_MOTIVATE = 'how_motivate'
+
         BKT = 'bkt'
-        STEPS_GOAL = 'steps_goal'
         IS_MET_GOAL_RECORD = 'is_met_goal_record'
+
+        LAST_FITBIT_SYNC = 'last_fitbit_sync'
+        STEPS_GOAL = 'steps_goal'
         SUGGESTED_STEPS_TODAY = 'suggested_steps_today'
         STEPS_TODAY = 'steps_today'
         STEPS_THIS_WEEK = 'steps_this_week'
         STEPS_LAST_WEEK = 'steps_last_week'
-        LAST_FITBIT_SYNC = 'last_fitbit_sync'
-        DAY_OFF = 'day_off'
+
         PSYCH_QUESTION_INDEX = 'psych_question_index'
         PSYCH_QUESTION_ANSWERS = 'psych_question_ANSWERS'
 
@@ -52,6 +62,18 @@ class StateDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             StateDb.Keys.FIRST_MEETING,
+            tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.LAST_AM_CHECKIN,
+            tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.LAST_PM_CHECKIN,
+            tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.CURRENT_DATETIME,
             tests=lambda x: type(x) is datetime.datetime
         )
         self.create_key_if_not_exists(

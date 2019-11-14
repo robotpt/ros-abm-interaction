@@ -66,7 +66,7 @@ class FirstMeeting:
             text_populator=text_populator,
         )
 
-    first_questions = DirectedGraph(
+    first_meeting = DirectedGraph(
         name='first meeting',
         start_node='ask name',
         nodes=[

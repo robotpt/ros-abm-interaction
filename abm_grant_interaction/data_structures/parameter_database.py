@@ -6,21 +6,29 @@ import yaml
 class ParameterDb(PickledDatabase):
 
     class Keys:
+
         MAX_NUM_QUESTIONS = 'max_number_of_questions'
+        INACTIVE_INTERACTION_TIMEOUT_SECONDS = 'inactive_interaction_timeout_seconds'
         NUM_OPTIONS_TO_DISPLAY = 'number_of_options_to_display'
+
         STEPS_PER_MINUTE_FOR_ACTIVE = 'steps_per_minute_for_active'
         ACTIVE_MINS_TO_REGISTER_ACTIVITY = 'active_minutes_to_register_activity'
         CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK = \
             'consecutive_minutes_inactive_before_breaking_activity_streak'
-        INACTIVE_INTERACTION_TIMEOUT_SECONDS = 'inactive_interaction_timeout_seconds'
+
         WEEKS_WITH_ROBOT = 'weeks_with_robot'
+
         FINAL_STEPS_GOAL = 'final_steps_goal'
         MIN_WEEKLY_STEPS_GOAL = 'min_weekly_steps_goal'
         MINS_BEFORE_WARNING_ABOUT_FITBIT_NOT_SYNCING = \
             'minutess_before_warning_about_fitbit_not_syncing'
+
         FITBIT_PULL_RATE_MINS = 'fitbit_pull_rate_minutes'
         FITBIT_CLIENT_ID = 'fitbit_client_id'
         FITBIT_CLIENT_SECRET = 'fitbit_client_secret'
+
+        MINS_BEFORE_ALLOW_CHECKIN = 'minutes_before_allow_checkin'
+        MINS_AFTER_ALLOW_CHECKIN = 'minutes_after_allow_checkin'
 
     def __init__(self, database_path='parameters.pkl', path_to_fitbit_secrets=None):
         super().__init__(database_path=database_path)
@@ -104,3 +112,15 @@ class ParameterDb(PickledDatabase):
                 ParameterDb.Keys.FITBIT_CLIENT_SECRET,
                 data['client_secret']
             )
+
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.MINS_BEFORE_ALLOW_CHECKIN,
+            60,
+            tests=check_non_negative_int
+        )
+
+        self.create_key_if_not_exists(
+            ParameterDb.Keys.MINS_AFTER_ALLOW_CHECKIN,
+            60,
+            tests=check_non_negative_int
+        )
