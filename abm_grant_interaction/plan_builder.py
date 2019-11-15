@@ -6,6 +6,7 @@ from abm_grant_interaction.interactions import \
 from interaction_engine.planner import MessagerPlanner
 import datetime
 import math
+import random
 
 
 class PlanBuilder:
@@ -46,10 +47,32 @@ class PlanBuilder:
 
         if planner is None:
             planner = MessagerPlanner(possible_plans)
+        planner.insert(AmCheckin.Messages.set_goal)
 
+        num_ii_qs = self.get_num_ii_questions(
+            self._max_ii_questions,
+            self._automaticity,
+        )
+        questions = []
+        for _ in range(num_ii_qs):
+            questions.append(
+                random.choice([
+                    AmCheckin.where_graph,
+                    AmCheckin.Messages.when_question,
+                    random.choice([
+                        AmCheckin.how_busy_graph,
+                        AmCheckin.how_remember_graph,
+                        AmCheckin.how_motivated_graph,
+                    ])
+                ])
+            )
+        for _ in range(self._max_ii_questions-num_ii_qs):
+            questions.append(AmCheckin.Messages.big_5_question)
+
+        planner.insert(questions)
         return planner
 
-    def num_ii_questions(self, max_qs, automaticity):
+    def get_num_ii_questions(self, max_qs, automaticity):
         if not (0 <= automaticity <= 1):
             raise ValueError("Automaticity should be between 0-1")
         return max(math.ceil((max_qs+1)*(1-automaticity))-1, 0)

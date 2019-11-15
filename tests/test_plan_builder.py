@@ -73,14 +73,6 @@ class TestPlanBuilder(unittest.TestCase):
             self.builder._build_pm_checkin()
         )
 
-    def test_build_am(self):
-        self.true_plan.insert(
-            [
-                AmCheckin.Messages.set_goal,
-            ]
-        )
-        state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
-
     def test_get_num_implementation_intention_questions_to_ask(self):
         max_num_qs = 3
         for automaticity, truth_num_qs in [
@@ -98,13 +90,13 @@ class TestPlanBuilder(unittest.TestCase):
         ]:
             self.assertEqual(
                 truth_num_qs,
-                self.builder.num_ii_questions(max_num_qs, automaticity)
+                self.builder.get_num_ii_questions(max_num_qs, automaticity)
             )
 
         for automaticity in [-1, -.01, 1.01, 2]:
             self.assertRaises(
                 ValueError,
-                self.builder.num_ii_questions,
+                self.builder.get_num_ii_questions,
                 max_num_qs,
                 automaticity
             )
