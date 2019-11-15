@@ -81,6 +81,34 @@ class TestPlanBuilder(unittest.TestCase):
         )
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
 
+    def test_get_num_implementation_intention_questions_to_ask(self):
+        max_num_qs = 3
+        for automaticity, truth_num_qs in [
+            (0, 3),
+            (0.01, 3),
+            (0.1, 3),
+            (0.24, 3),
+            (0.26, 2),
+            (0.49, 2),
+            (0.51, 1),
+            (0.74, 1),
+            (0.76, 0),
+            (0.99, 0),
+            (1.0, 0),
+        ]:
+            self.assertEqual(
+                truth_num_qs,
+                self.builder.num_ii_questions(max_num_qs, automaticity)
+            )
+
+        for automaticity in [-1, -.01, 1.01, 2]:
+            self.assertRaises(
+                ValueError,
+                self.builder.num_ii_questions,
+                max_num_qs,
+                automaticity
+            )
+
     def test_is_checkin(self):
 
         am_hour, am_minute = 8, 0

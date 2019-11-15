@@ -5,6 +5,8 @@ from abm_grant_interaction.interactions import \
     possible_plans
 from interaction_engine.planner import MessagerPlanner
 import datetime
+import math
+
 
 class PlanBuilder:
 
@@ -41,7 +43,16 @@ class PlanBuilder:
         )
 
     def _build_am_checkin(self, planner=None):
+
+        if planner is None:
+            planner = MessagerPlanner(possible_plans)
+
         return planner
+
+    def num_ii_questions(self, max_qs, automaticity):
+        if not (0 <= automaticity <= 1):
+            raise ValueError("Automaticity should be between 0-1")
+        return max(math.ceil((max_qs+1)*(1-automaticity))-1, 0)
 
     def _build_pm_checkin(self, planner=None):
 
@@ -95,6 +106,20 @@ class PlanBuilder:
         else:
             return False
 
+    def _is_missed_am(self):
+        return self._is_missed_checkin(
+            self._am_checkin_time,
+            self._mins_after_checkin_allowed,
+            self._last_am_checkin,
+        )
+
+    def _is_missed_pm(self):
+        return self._is_missed_checkin(
+            self._pm_checkin_time,
+            self._mins_after_checkin_allowed,
+            self._last_pm_checkin,
+        )
+
     def _is_missed_checkin(self, checkin_time, time_after_allowed, last_checkin):
         checkin_datetime = _put_time_to_datetime(checkin_time, self._current_datetime)
         return not (
@@ -145,6 +170,10 @@ class PlanBuilder:
     def _automaticity(self):
         return self._bkt.get_automaticity()
 
+    @property
+    def _max_ii_questions(self):
+        return param_db.get(param_db.Keys.MAX_NUM_QUESTIONS)
+
 
     @property
     def _bkt(self) -> Bkt:
@@ -181,10 +210,6 @@ def _is_time_within_range(time, reference_datetime, mins_before, mins_after):
 
 def _put_time_to_datetime(time, datetime_):
     return datetime_.replace(hour=time.hour, minute=time.minute)
-
-
-
-
 
 
 if __name__ == '__main__':
