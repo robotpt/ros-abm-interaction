@@ -1,5 +1,4 @@
 import numpy as np
-import queue
 from robotpt_common_utils import lists
 from hmmlearn import hmm
 
@@ -14,7 +13,7 @@ class Bkt:
         self._pG = pG
 
     def _get_model(self):
-        model = hmm.MultinomialHMM(n_components=len(self._priors))
+        model = hmm.MultinomialHMM(n_components=len(self._priors), n_iter=10)
         model.startprob_ = self._priors
         model.transmat_ = self._transitions_matrix
         model.emissionprob_ = self._observations_matrix
@@ -38,10 +37,18 @@ class Bkt:
         nums = lists.make_sure_is_iterable(nums)
         return [n[0] == value_for_true for n in nums]
 
-    def fit(self, X, lengths=None):
+    def fit(self, obs):
+        obs = lists.make_sure_is_iterable(obs)
+
+        if all(obs):
+            obs = [False] + obs
+        elif not any(obs):
+            obs = [True] + obs
+
+        obs = Bkt._bool_list_to_hmmlearn_number_array(obs)
+
         model = self._get_model()
-        X = Bkt._bool_list_to_hmmlearn_number_array(X)
-        model.fit(X, lengths)
+        model.fit(obs)
 
         pL_ = model.startprob_[0]
         pT_ = model.transmat_[1][0]
@@ -63,7 +70,7 @@ class Bkt:
             else:
                 pL_ = (self._pL*self._pS) / (self._pL*self._pS + (1-self._pL)*(1-self._pG))
             self._pL = pL_
-        return Bkt(pL_, self._pT, self._pS, self._pG)
+        return Bkt(self._pL, self._pT, self._pS, self._pG)
 
     def get_automaticity(self):
         return self._pL
@@ -101,6 +108,9 @@ class Bkt:
     def _observations_matrix(self):
         return np.array([[1-self._pS, self._pS],
                          [self._pG, 1-self._pG]])
+
+    def __eq__(self, other):
+        return self.get_params() == other.get_params()
 
 
 if __name__ == '__main__':
