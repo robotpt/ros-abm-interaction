@@ -25,6 +25,14 @@ class Bkt:
         X, _ = model.sample(n)
         return Bkt._hmmlearn_number_array_to_bool_list(X)
 
+    def get_params(self):
+        return (
+            self._pL,
+            self._pT,
+            self._pS,
+            self._pG,
+        )
+
     @staticmethod
     def _hmmlearn_number_array_to_bool_list(nums, value_for_true=1):
         nums = lists.make_sure_is_iterable(nums)
@@ -137,5 +145,3 @@ if __name__ == '__main__':
     print("The start probability matrix is: ")
     print(bkt._priors)
     print("--------------------")
-
-q = queue.Queue(maxsize=100)

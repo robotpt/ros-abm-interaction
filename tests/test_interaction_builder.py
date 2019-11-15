@@ -171,3 +171,39 @@ class TestInteractionBuilder(unittest.TestCase):
 
         state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
         self.assertFalse(builder._is_pm_checkin())
+
+    def test_get_set_bkt(self):
+
+        bkt1 = builder._get_bkt()
+        pL0, pT0, pS0, pG0 = bkt1.get_params()
+
+        observations = [True, True, True, True, False]
+        bkt1 = bkt1.update(observations)
+
+        pL1, pT1, pS1, pG1 = bkt1.get_params()
+        self.assertNotEqual(pL0, pL1)
+        self.assertEqual(pT0, pT1)
+        self.assertEqual(pS0, pS1)
+        self.assertEqual(pG0, pG1)
+        builder._save_bkt(bkt1)
+
+        bkt2 = builder._get_bkt()
+        pL1_, pT1_, pS1_, pG1_ = bkt2.get_params()
+        self.assertEqual(pL1, pL1_)
+        self.assertEqual(pT1, pT1_)
+        self.assertEqual(pS1, pS1_)
+        self.assertEqual(pG1, pG1_)
+
+        bkt1 = bkt1.fit(observations)
+        pL2, pT2, pS2, pG2 = bkt1.get_params()
+        self.assertNotEqual(pL1, pL2)
+        self.assertNotEqual(pT1, pT2)
+        self.assertNotEqual(pS1, pS2)
+        self.assertNotEqual(pG1, pG2)
+
+        bkt3 = builder._get_bkt()
+        pL2_, pT2_, pS2_, pG2_ = bkt3.get_params()
+        self.assertNotEqual(pL2, pL2_)
+        self.assertNotEqual(pT2, pT2_)
+        self.assertNotEqual(pS2, pS2_)
+        self.assertNotEqual(pG2, pG2_)

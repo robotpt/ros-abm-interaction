@@ -27,7 +27,10 @@ class StateDb(PickledDatabase):
         HOW_REMEMBER = 'how_remember'
         HOW_MOTIVATE = 'how_motivate'
 
-        BKT = 'bkt'
+        BKT_pL = 'bkt_pL'
+        BKT_pT = 'bkt_pT'
+        BKT_pS = 'bkt_pS'
+        BKT_pG = 'bkt_pG'
         IS_MET_GOAL_RECORD = 'is_met_goal_record'
 
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
@@ -120,8 +123,24 @@ class StateDb(PickledDatabase):
             ]
         )
         self.create_key_if_not_exists(
-            StateDb.Keys.BKT,
-            tests=lambda x: type(x) is Bkt
+            StateDb.Keys.BKT_pL,
+            0.0,
+            tests=lambda x: 0 <= x < 1,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.BKT_pT,
+            0.02,
+            tests=lambda x: 0 <= x <= 1,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.BKT_pS,
+            0.3,
+            tests=lambda x: 0 <= x <= 1,
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.BKT_pG,
+            0.5,
+            tests=lambda x: 0 <= x <= 1,
         )
         self.create_key_if_not_exists(
             StateDb.Keys.STEPS_GOAL,

@@ -127,6 +127,27 @@ def _current_datetime():
     )
 
 
+def _get_bkt() -> Bkt:
+    pL = state_db.get(state_db.Keys.BKT_pL)
+    pT = state_db.get(state_db.Keys.BKT_pT)
+    pS = state_db.get(state_db.Keys.BKT_pS)
+    pG = state_db.get(state_db.Keys.BKT_pG)
+
+    return Bkt(pL0=pL, pT=pT, pS=pS, pG=pG)
+
+
+def _save_bkt(bkt: Bkt):
+
+    if type(bkt) is not Bkt:
+        raise ValueError
+
+    pL, pT, pS, pG = bkt.get_params()
+    state_db.set(state_db.Keys.BKT_pL, pL)
+    state_db.set(state_db.Keys.BKT_pT, pT)
+    state_db.set(state_db.Keys.BKT_pS, pS)
+    state_db.set(state_db.Keys.BKT_pG, pG)
+
+
 if __name__ == '__main__':
 
     planner_ = build_plan()
