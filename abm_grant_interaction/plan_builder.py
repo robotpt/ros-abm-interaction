@@ -23,11 +23,8 @@ class PlanBuilder:
                 post_hook=self._set_first_meeting_to_current_time,
             )
         else:
-            planner.insert(Common.Messages.greeting)
-
             if self._is_missed_checkin():
                 planner.insert(Common.Messages.missed_checkin)
-
             if self._is_am_checkin():
                 planner = self._build_am_checkin(planner)
             elif self._is_pm_checkin():
@@ -47,8 +44,21 @@ class PlanBuilder:
 
         if planner is None:
             planner = MessagerPlanner(possible_plans)
-        planner.insert(AmCheckin.Messages.set_goal)
 
+        planner.insert(Common.Messages.greeting)
+        planner.insert(AmCheckin.Messages.set_goal)
+        planner.insert(self._build_am_questions())
+
+        planner.insert(
+            Common.Messages.closing,
+            post_hook=lambda: state_db.set(
+                state_db.Keys.LAST_AM_CHECKIN,
+                self._current_datetime,
+            )
+        )
+        return planner
+
+    def _build_am_questions(self):
         num_ii_qs = self.get_num_ii_questions(
             self._max_ii_questions,
             self._automaticity,
@@ -66,11 +76,9 @@ class PlanBuilder:
                     ])
                 ])
             )
-        for _ in range(self._max_ii_questions-num_ii_qs):
+        for _ in range(self._max_ii_questions - num_ii_qs):
             questions.append(AmCheckin.Messages.big_5_question)
-
-        planner.insert(questions)
-        return planner
+        return questions
 
     def get_num_ii_questions(self, max_qs, automaticity):
         if not (0 <= automaticity <= 1):

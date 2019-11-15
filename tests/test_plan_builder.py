@@ -73,6 +73,27 @@ class TestPlanBuilder(unittest.TestCase):
             self.builder._build_pm_checkin()
         )
 
+    def test_last_block_in_am_registers_am_as_completed(self):
+
+        hour, minute = 8, 0
+        checkin_time = datetime.time(hour, minute)
+        state_db.set(state_db.Keys.AM_CHECKIN_TIME, checkin_time)
+
+        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
+        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+
+        last_checkin = datetime.datetime.now().replace(hour=hour, minute=minute) - \
+                       datetime.timedelta(days=1)
+        state_db.set(state_db.Keys.LAST_AM_CHECKIN, last_checkin)
+
+        self.assertTrue(self.builder._is_am_checkin())
+        plan = self.builder._build_am_checkin()
+        for _ in range(len(plan.plan)-1):
+            simulate_run_once(plan)
+            self.assertTrue(self.builder._is_am_checkin())
+        simulate_run_once(plan)
+        self.assertFalse(self.builder._is_am_checkin())
+
     def test_get_num_implementation_intention_questions_to_ask(self):
         max_num_qs = 3
         for automaticity, truth_num_qs in [
