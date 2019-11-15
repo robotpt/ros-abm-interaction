@@ -1,4 +1,4 @@
-from abm_grant_interaction import interaction_builder as builder
+from abm_grant_interaction import plan_builder
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import \
     AmCheckin, PmCheckin, Common, FirstMeeting, OffCheckin, Options, \
@@ -32,18 +32,19 @@ def simulate_run_once(plan):
     post_hook()
 
 
-class TestInteractionBuilder(unittest.TestCase):
+class TestPlanBuilder(unittest.TestCase):
 
     def setUp(self) -> None:
 
         state_db.reset()
 
         self.true_plan = MessagerPlanner(possible_plans)
+        self.builder = plan_builder.PlanBuilder()
 
     def test_select_first_meeting(self):
         self.true_plan.insert(FirstMeeting.first_meeting)
 
-        resulting_plan = builder.build_plan()
+        resulting_plan = self.builder.build()
         self.assertEqual(self.true_plan, resulting_plan)
 
         self.assertFalse(state_db.is_set(state_db.Keys.FIRST_MEETING))
@@ -59,7 +60,7 @@ class TestInteractionBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         self.assertEqual(
             self.true_plan,
-            builder._build_pm_checkin()
+            self.builder._build_pm_checkin()
         )
 
     def test_build_pm_with_goal_fail(self):
@@ -69,7 +70,7 @@ class TestInteractionBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.STEPS_TODAY, 100)
         self.assertEqual(
             self.true_plan,
-            builder._build_pm_checkin()
+            self.builder._build_pm_checkin()
         )
 
     def test_build_am(self):
@@ -109,14 +110,14 @@ class TestInteractionBuilder(unittest.TestCase):
                 )
                 am_current_datetime -= datetime.timedelta(minutes=d_minute)
                 state_db.set(state_db.Keys.CURRENT_DATETIME, am_current_datetime)
-                self.assertTrue(builder._is_am_checkin())
+                self.assertTrue(self.builder._is_am_checkin())
 
                 pm_current_datetime = datetime.datetime.now().replace(
                     hour=pm_hour, minute=pm_minute
                 )
                 pm_current_datetime -= datetime.timedelta(minutes=d_minute)
                 state_db.set(state_db.Keys.CURRENT_DATETIME, pm_current_datetime)
-                self.assertTrue(builder._is_pm_checkin())
+                self.assertTrue(self.builder._is_pm_checkin())
 
             for d_minute in [
                 -mins_before_allowed-1,
@@ -129,7 +130,7 @@ class TestInteractionBuilder(unittest.TestCase):
                 )
                 am_current_datetime += datetime.timedelta(minutes=d_minute)
                 state_db.set(state_db.Keys.CURRENT_DATETIME, am_current_datetime)
-                is_am = builder._is_am_checkin()
+                is_am = self.builder._is_am_checkin()
                 self.assertFalse(is_am)
 
                 pm_current_datetime = datetime.datetime.now().replace(
@@ -137,7 +138,7 @@ class TestInteractionBuilder(unittest.TestCase):
                 )
                 pm_current_datetime += datetime.timedelta(minutes=d_minute)
                 state_db.set(state_db.Keys.CURRENT_DATETIME, pm_current_datetime)
-                is_pm = builder._is_pm_checkin()
+                is_pm = self.builder._is_pm_checkin()
                 self.assertFalse(is_pm)
 
     def test_try_am_with_last_checkin_today(self):
@@ -153,7 +154,7 @@ class TestInteractionBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.LAST_AM_CHECKIN, last_checkin)
 
         state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
-        self.assertFalse(builder._is_am_checkin())
+        self.assertFalse(self.builder._is_am_checkin())
 
     def test_try_pm_with_last_checkin_today(self):
 
@@ -168,7 +169,7 @@ class TestInteractionBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.LAST_PM_CHECKIN, last_checkin)
 
         state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
-        self.assertFalse(builder._is_pm_checkin())
+        self.assertFalse(self.builder._is_pm_checkin())
 
     def test_missed_checkin(self):
         hour, minute = 18, 30
@@ -181,44 +182,44 @@ class TestInteractionBuilder(unittest.TestCase):
             state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
 
             self.assertFalse(
-                builder._is_missed_generic_checkin(checkin_time, time_after_allowed, last_checkin)
+                self.builder._is_missed_checkin(checkin_time, time_after_allowed, last_checkin)
             )
         for i in range(time_after_allowed, 2*time_after_allowed):
             current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute+i)
             state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
 
             self.assertTrue(
-                builder._is_missed_generic_checkin(checkin_time, time_after_allowed, last_checkin)
+                self.builder._is_missed_checkin(checkin_time, time_after_allowed, last_checkin)
             )
 
     def test_get_set_bkt(self):
 
-        pL0, pT0, pS0, pG0 = builder._get_bkt().get_params()
+        pL0, pT0, pS0, pG0 = self.builder._bkt.get_params()
 
         observations = [True, False, True, True, False]
 
-        builder._bkt_update_pL(observations)
-        pL1, pT1, pS1, pG1 = builder._get_bkt().get_params()
+        self.builder._bkt_update_pL(observations)
+        pL1, pT1, pS1, pG1 = self.builder._bkt.get_params()
         self.assertNotEqual(pL0, pL1)
         self.assertEqual(pT0, pT1)
         self.assertEqual(pS0, pS1)
         self.assertEqual(pG0, pG1)
 
-        pL1_, pT1_, pS1_, pG1_ = builder._get_bkt().get_params()
+        pL1_, pT1_, pS1_, pG1_ = self.builder._bkt.get_params()
         self.assertEqual(pL1, pL1_)
         self.assertEqual(pT1, pT1_)
         self.assertEqual(pS1, pS1_)
         self.assertEqual(pG1, pG1_)
 
-        builder._bkt_update_full_model(observations)
-        pL2, pT2, pS2, pG2 = builder._get_bkt().get_params()
+        self.builder._bkt_update_full_model(observations)
+        pL2, pT2, pS2, pG2 = self.builder._bkt.get_params()
         self.assertNotEqual(pL1, pL2)
         self.assertNotEqual(pT1, pT2)
         self.assertNotEqual(pS1, pS2)
         self.assertNotEqual(pG1, pG2)
 
     def test_bkt_operations(self):
-        automaticity = builder._get_automaticity()
+        automaticity = self.builder._automaticity
         # True because of adding epsilon to make not degenerate
         self.assertLessEqual(
             state_db.get(state_db.Keys.BKT_pL),
@@ -227,8 +228,8 @@ class TestInteractionBuilder(unittest.TestCase):
 
         old_pL = automaticity
         for _ in range(100):
-            builder._bkt_update_pL(True)
-            new_pL = builder._get_automaticity()
+            self.builder._bkt_update_pL(True)
+            new_pL = self.builder._automaticity
             self.assertLessEqual(old_pL, new_pL)
             old_pL = new_pL
         self.assertLess(automaticity, old_pL)
