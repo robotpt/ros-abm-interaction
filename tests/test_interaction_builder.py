@@ -145,8 +145,7 @@ class TestInteractionBuilder(unittest.TestCase):
         hour, minute = 8, 0
         checkin_time = datetime.time(hour, minute)
         state_db.set(state_db.Keys.AM_CHECKIN_TIME, checkin_time)
-        current_datetime = datetime.datetime.now().replace(
-        )
+        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
 
         last_checkin = datetime.datetime.now().replace(hour=hour, minute=minute) - \
                        datetime.timedelta(days=0)
@@ -161,8 +160,7 @@ class TestInteractionBuilder(unittest.TestCase):
         hour, minute = 18, 30
         checkin_time = datetime.time(hour, minute)
         state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
-        current_datetime = datetime.datetime.now().replace(
-        )
+        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
 
         last_checkin = datetime.datetime.now().replace(hour=hour, minute=minute) - \
                        datetime.timedelta(days=0)
@@ -171,6 +169,27 @@ class TestInteractionBuilder(unittest.TestCase):
 
         state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
         self.assertFalse(builder._is_pm_checkin())
+
+    def test_missed_checkin(self):
+        hour, minute = 18, 30
+        checkin_time = datetime.time(hour, minute)
+        time_after_allowed = 15
+        last_checkin = datetime.datetime.now().replace(hour=hour, minute=minute) - \
+                       datetime.timedelta(days=1)
+        for i in range(time_after_allowed):
+            current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute+i)
+            state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+
+            self.assertFalse(
+                builder._is_missed_generic_checkin(checkin_time, time_after_allowed, last_checkin)
+            )
+        for i in range(time_after_allowed, 2*time_after_allowed):
+            current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute+i)
+            state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+
+            self.assertTrue(
+                builder._is_missed_generic_checkin(checkin_time, time_after_allowed, last_checkin)
+            )
 
     def test_get_set_bkt(self):
 

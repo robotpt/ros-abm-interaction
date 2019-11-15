@@ -43,7 +43,28 @@ def _set_first_meeting_to_current_time():
 
 
 def _is_missed_checkin():
-    return False
+    last_am_checkin = state_db.get(state_db.Keys.LAST_AM_CHECKIN)
+    last_pm_checkin = state_db.get(state_db.Keys.LAST_PM_CHECKIN)
+    mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
+
+    if (
+            (
+                    _current_datetime() > last_am_checkin + datetime.timedelta(minutes=mins_after_allowed) and
+                    last_am_checkin.date() != _current_datetime().date()
+            ) or (
+            _current_datetime() > last_am_checkin + datetime.timedelta(minutes=mins_after_allowed) and
+            last_am_checkin.date() != _current_datetime().date()
+    )
+    ):
+        pass
+
+
+def _is_missed_generic_checkin(checkin_time, time_after_allowed, last_checkin):
+    checkin_datetime = _put_time_to_datetime(checkin_time, _current_datetime())
+    return not (
+        checkin_datetime + datetime.timedelta(minutes=time_after_allowed) > _current_datetime()
+        and last_checkin.date() != _current_datetime().date()
+    )
 
 
 def _is_am_checkin():
