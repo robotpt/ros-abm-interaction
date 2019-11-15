@@ -127,6 +127,23 @@ def _current_datetime():
     )
 
 
+def _bkt_update_pL(observations):
+    bkt = _get_bkt()
+    bkt = bkt.update(observations)
+    _save_bkt(bkt)
+
+
+def _bkt_update_full_model(observations):
+    bkt = _get_bkt()
+    bkt = bkt.fit(observations)
+    _save_bkt(bkt)
+
+
+def _get_automaticity():
+    bkt = _get_bkt()
+    return bkt.get_automaticity()
+
+
 def _get_bkt() -> Bkt:
     pL = state_db.get(state_db.Keys.BKT_pL)
     pT = state_db.get(state_db.Keys.BKT_pT)

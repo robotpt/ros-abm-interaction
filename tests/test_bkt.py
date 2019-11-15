@@ -17,10 +17,10 @@ class TestBkt(unittest.TestCase):
         for _ in range(100):
             bkt.update(True)
             pL_new = bkt.get_automaticity()
-            self.assertLess(pL0_, pL_new)
             self.assertLessEqual(pL_old, pL_new)
             self.assertNotEqual(1.0, pL_new)
             pL_old = pL_new
+        self.assertLess(pL0_, pL_old)
 
         for _ in range(100):
             bkt.update(False)
@@ -43,10 +43,10 @@ class TestBkt(unittest.TestCase):
         for _ in range(100):
             bkt = bkt.update(True)
             pL_new = bkt.get_automaticity()
-            self.assertLess(pL0_, pL_new)
             self.assertLessEqual(pL_old, pL_new)
             self.assertNotEqual(1.0, pL_new)
             pL_old = pL_new
+        self.assertLess(pL0_, pL_old)
 
         for _ in range(100):
             bkt = bkt.update(False)

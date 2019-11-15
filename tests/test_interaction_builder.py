@@ -72,7 +72,7 @@ class TestInteractionBuilder(unittest.TestCase):
             builder._build_pm_checkin()
         )
 
-    def test_build_am_at_all(self):
+    def test_build_am(self):
         self.true_plan.insert(
             [
                 AmCheckin.Messages.set_goal,
@@ -174,36 +174,42 @@ class TestInteractionBuilder(unittest.TestCase):
 
     def test_get_set_bkt(self):
 
-        bkt1 = builder._get_bkt()
-        pL0, pT0, pS0, pG0 = bkt1.get_params()
+        pL0, pT0, pS0, pG0 = builder._get_bkt().get_params()
 
-        observations = [True, True, True, True, False]
-        bkt1 = bkt1.update(observations)
+        observations = [True, False, True, True, False]
 
-        pL1, pT1, pS1, pG1 = bkt1.get_params()
+        builder._bkt_update_pL(observations)
+        pL1, pT1, pS1, pG1 = builder._get_bkt().get_params()
         self.assertNotEqual(pL0, pL1)
         self.assertEqual(pT0, pT1)
         self.assertEqual(pS0, pS1)
         self.assertEqual(pG0, pG1)
-        builder._save_bkt(bkt1)
 
-        bkt2 = builder._get_bkt()
-        pL1_, pT1_, pS1_, pG1_ = bkt2.get_params()
+        pL1_, pT1_, pS1_, pG1_ = builder._get_bkt().get_params()
         self.assertEqual(pL1, pL1_)
         self.assertEqual(pT1, pT1_)
         self.assertEqual(pS1, pS1_)
         self.assertEqual(pG1, pG1_)
 
-        bkt1 = bkt1.fit(observations)
-        pL2, pT2, pS2, pG2 = bkt1.get_params()
+        builder._bkt_update_full_model(observations)
+        pL2, pT2, pS2, pG2 = builder._get_bkt().get_params()
         self.assertNotEqual(pL1, pL2)
         self.assertNotEqual(pT1, pT2)
         self.assertNotEqual(pS1, pS2)
         self.assertNotEqual(pG1, pG2)
 
-        bkt3 = builder._get_bkt()
-        pL2_, pT2_, pS2_, pG2_ = bkt3.get_params()
-        self.assertNotEqual(pL2, pL2_)
-        self.assertNotEqual(pT2, pT2_)
-        self.assertNotEqual(pS2, pS2_)
-        self.assertNotEqual(pG2, pG2_)
+    def test_bkt_operations(self):
+        automaticity = builder._get_automaticity()
+        # True because of adding epsilon to make not degenerate
+        self.assertLessEqual(
+            state_db.get(state_db.Keys.BKT_pL),
+            automaticity
+        )
+
+        old_pL = automaticity
+        for _ in range(100):
+            builder._bkt_update_pL(True)
+            new_pL = builder._get_automaticity()
+            self.assertLessEqual(old_pL, new_pL)
+            old_pL = new_pL
+        self.assertLess(automaticity, old_pL)
