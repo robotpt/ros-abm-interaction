@@ -4,7 +4,11 @@ from abm_grant_interaction.interactions import \
     AmCheckin, PmCheckin, Common, FirstMeeting, OffCheckin, Options, \
     possible_plans
 
+from interaction_engine.interfaces import Interface
 from interaction_engine.planner import MessagerPlanner
+from interaction_engine.messager import DirectedGraph, Message
+
+from robotpt_common_utils import lists
 
 import unittest
 import datetime
@@ -24,12 +28,32 @@ def simulate_run_plan(plan):
         simulate_run_once(plan)
 
 
-def simulate_run_once(plan):
+messagers = dict()
+for m in possible_plans:
+    messagers[m.name] = m
+
+
+def simulate_run_once(plan, is_populate_messages=False):
 
     message_name, pre_hook, post_hook = plan.pop_plan(is_return_hooks=True)
 
     pre_hook()
+    if is_populate_messages:
+        populate_messages(message_name)
     post_hook()
+
+
+def populate_messages(message_name):
+    messager = messagers[message_name]
+    if type(messager) is Message:
+        messages = [messager]
+    elif type(messager) is DirectedGraph:
+        messages = []
+        for node in messager.get_nodes():
+            messages.append(messager.get_message(node))
+    for message in messages:
+        message.content
+        message.options
 
 
 class TestPlanBuilder(unittest.TestCase):
@@ -40,6 +64,7 @@ class TestPlanBuilder(unittest.TestCase):
 
         self.true_plan = MessagerPlanner(possible_plans)
         self.builder = plan_builder.PlanBuilder()
+
 
     def test_select_first_meeting(self):
         self.true_plan.insert(FirstMeeting.first_meeting)
@@ -53,7 +78,13 @@ class TestPlanBuilder(unittest.TestCase):
         self.assertTrue(state_db.is_set(state_db.Keys.FIRST_MEETING))
 
     def test_build_pm_with_goal_met(self):
-        self.true_plan.insert(PmCheckin.success_graph)
+        self.true_plan.insert(
+            [
+                Common.Messages.greeting,
+                PmCheckin.success_graph,
+                Common.Messages.closing,
+            ]
+        )
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         state_db.set(state_db.Keys.STEPS_GOAL, 100)
         state_db.set(state_db.Keys.STEPS_TODAY, 200)
@@ -64,7 +95,13 @@ class TestPlanBuilder(unittest.TestCase):
         )
 
     def test_build_pm_with_goal_fail(self):
-        self.true_plan.insert(PmCheckin.fail_graph)
+        self.true_plan.insert(
+            [
+                Common.Messages.greeting,
+                PmCheckin.fail_graph,
+                Common.Messages.closing,
+            ]
+        )
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         state_db.set(state_db.Keys.STEPS_GOAL, 200)
         state_db.set(state_db.Keys.STEPS_TODAY, 100)
@@ -74,6 +111,8 @@ class TestPlanBuilder(unittest.TestCase):
         )
 
     def test_last_block_in_am_registers_am_as_completed(self):
+
+        state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, 300)
 
         hour, minute = 8, 0
         checkin_time = datetime.time(hour, minute)
@@ -94,6 +133,30 @@ class TestPlanBuilder(unittest.TestCase):
         simulate_run_once(plan)
         self.assertFalse(self.builder._is_am_checkin())
 
+    def test_last_block_in_pm_registers_am_as_completed(self):
+
+        hour, minute = 18, 0
+        checkin_time = datetime.time(hour, minute)
+        state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
+
+        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
+        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+
+        last_checkin = datetime.datetime.now().replace(hour=hour, minute=minute) - \
+                       datetime.timedelta(days=1)
+        state_db.set(state_db.Keys.LAST_PM_CHECKIN, last_checkin)
+
+        state_db.set(state_db.Keys.STEPS_TODAY, 300)
+        state_db.set(state_db.Keys.STEPS_GOAL, 600)
+
+        self.assertTrue(self.builder._is_pm_checkin())
+        plan = self.builder._build_pm_checkin()
+        for _ in range(len(plan.plan)-1):
+            simulate_run_once(plan)
+            self.assertTrue(self.builder._is_pm_checkin())
+        simulate_run_once(plan)
+        self.assertFalse(self.builder._is_pm_checkin())
+
     def test_get_num_implementation_intention_questions_to_ask(self):
         max_num_qs = 3
         for automaticity, truth_num_qs in [
@@ -111,13 +174,13 @@ class TestPlanBuilder(unittest.TestCase):
         ]:
             self.assertEqual(
                 truth_num_qs,
-                self.builder.get_num_ii_questions(max_num_qs, automaticity)
+                self.builder._get_num_ii_questions(max_num_qs, automaticity)
             )
 
         for automaticity in [-1, -.01, 1.01, 2]:
             self.assertRaises(
                 ValueError,
-                self.builder.get_num_ii_questions,
+                self.builder._get_num_ii_questions,
                 max_num_qs,
                 automaticity
             )
@@ -274,3 +337,4 @@ class TestPlanBuilder(unittest.TestCase):
             self.assertLessEqual(old_pL, new_pL)
             old_pL = new_pL
         self.assertLess(automaticity, old_pL)
+

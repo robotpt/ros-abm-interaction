@@ -15,22 +15,26 @@ class PlanBuilder:
         pass
 
     def build(self):
-        planner = MessagerPlanner(possible_plans)
-
         if self._is_first_meeting():
-            planner.insert(
-                FirstMeeting.first_meeting,
-                post_hook=self._set_first_meeting_to_current_time,
-            )
+            planner = self._build_first_meeting()
+        elif self._is_am_checkin():
+            planner = self._build_am_checkin()
+        elif self._is_pm_checkin():
+            planner = self._build_pm_checkin()
         else:
-            if self._is_missed_checkin():
-                planner.insert(Common.Messages.missed_checkin)
-            if self._is_am_checkin():
-                planner = self._build_am_checkin(planner)
-            elif self._is_pm_checkin():
-                planner = self._build_pm_checkin(planner)
+            planner = self._build_off_checkin()
 
-            planner.insert(Common.Messages.closing)
+        return planner
+
+    def _build_first_meeting(self, planner=None):
+
+        if planner is None:
+            planner = MessagerPlanner(possible_plans)
+
+        planner.insert(
+            FirstMeeting.first_meeting,
+            post_hook=self._set_first_meeting_to_current_time,
+        )
 
         return planner
 
@@ -59,7 +63,7 @@ class PlanBuilder:
         return planner
 
     def _build_am_questions(self):
-        num_ii_qs = self.get_num_ii_questions(
+        num_ii_qs = self._get_num_ii_questions(
             self._max_ii_questions,
             self._automaticity,
         )
@@ -80,7 +84,7 @@ class PlanBuilder:
             questions.append(AmCheckin.Messages.big_5_question)
         return questions
 
-    def get_num_ii_questions(self, max_qs, automaticity):
+    def _get_num_ii_questions(self, max_qs, automaticity):
         if not (0 <= automaticity <= 1):
             raise ValueError("Automaticity should be between 0-1")
         return max(math.ceil((max_qs+1)*(1-automaticity))-1, 0)
@@ -90,10 +94,26 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
+        planner.insert(Common.Messages.greeting)
         if self._is_met_steps_goal_today():
             planner.insert(PmCheckin.success_graph)
         else:
             planner.insert(PmCheckin.fail_graph)
+
+        planner.insert(
+            Common.Messages.closing,
+            post_hook=lambda: state_db.set(
+                state_db.Keys.LAST_PM_CHECKIN,
+                self._current_datetime,
+            )
+        )
+
+        return planner
+
+    def _build_off_checkin(self, planner=None):
+
+        if planner is None:
+            planner = MessagerPlanner(possible_plans)
 
         return planner
 
@@ -241,10 +261,3 @@ def _is_time_within_range(time, reference_datetime, mins_before, mins_after):
 
 def _put_time_to_datetime(time, datetime_):
     return datetime_.replace(hour=time.hour, minute=time.minute)
-
-
-if __name__ == '__main__':
-
-    planner_ = PlanBuilder().build()
-    for p in planner_.plan:
-        print(p)
