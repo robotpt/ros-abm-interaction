@@ -12,9 +12,6 @@ import random
 
 class PlanBuilder:
 
-    def __init__(self):
-        pass
-
     def build(self):
         if self._is_first_meeting():
             planner = self._build_first_meeting()
@@ -94,9 +91,15 @@ class PlanBuilder:
 
         planner.insert(Common.Messages.greeting)
         if self._is_met_steps_goal_today():
-            planner.insert(PmCheckin.success_graph)
+            planner.insert(
+                PmCheckin.success_graph,
+                post_hook=lambda: self._bkt_update_pL(True)
+            )
         else:
-            planner.insert(PmCheckin.fail_graph)
+            planner.insert(
+                PmCheckin.fail_graph,
+                post_hook=lambda: self._bkt_update_pL(False)
+            )
 
         planner.insert(
             Common.Messages.closing,

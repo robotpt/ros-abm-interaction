@@ -147,6 +147,38 @@ class TestPlanBuilder(unittest.TestCase):
         simulate_run_once(plan)
         self.assertFalse(self.builder._is_pm_checkin())
 
+    def test_run_pm_updates_bkt(self):
+
+        hour, minute = 18, 0
+        checkin_time = datetime.time(hour, minute)
+        state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
+        state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+
+        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
+        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+
+        self.assertTrue(self.builder._is_pm_checkin())
+
+        for _ in range(10):
+            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+            state_db.set(state_db.Keys.STEPS_TODAY, 100)
+            state_db.set(state_db.Keys.STEPS_GOAL, 20)
+            plan = self.builder._build_pm_checkin()
+            pL_old = self.builder._bkt.get_automaticity()
+            simulate_run_plan(plan)
+            pL_new = self.builder._bkt.get_automaticity()
+            self.assertLessEqual(pL_old, pL_new)
+
+        for _ in range(10):
+            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+            state_db.set(state_db.Keys.STEPS_TODAY, 10)
+            state_db.set(state_db.Keys.STEPS_GOAL, 20)
+            plan = self.builder._build_pm_checkin()
+            pL_old = self.builder._bkt.get_automaticity()
+            simulate_run_plan(plan)
+            pL_new = self.builder._bkt.get_automaticity()
+            self.assertGreaterEqual(pL_old, pL_new)
+
     def test_get_num_implementation_intention_questions_to_ask(self):
         max_num_qs = 3
         for automaticity, truth_num_qs in [
