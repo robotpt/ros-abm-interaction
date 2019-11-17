@@ -12,8 +12,9 @@ class StateDb(PickledDatabase):
         USER_NAME = 'user_name'
 
         FIRST_MEETING = 'first_meeting'
-        LAST_AM_CHECKIN = 'last_am_checkin'
-        LAST_PM_CHECKIN = 'last_pm_checkin'
+        IS_DONE_AM_CHECKIN_TODAY = 'is_done_am_checkin_today'
+        IS_DONE_PM_CHECKIN_TODAY = 'is_done_pm_checkin_today'
+        IS_MISSED_PM_YESTERDAY = 'is_missed_pm_yesterday'
         CURRENT_DATETIME = 'current_datetime'
 
         AM_CHECKIN_TIME = 'am_checkin_time'
@@ -68,12 +69,16 @@ class StateDb(PickledDatabase):
             tests=lambda x: type(x) is datetime.datetime
         )
         self.create_key_if_not_exists(
-            StateDb.Keys.LAST_AM_CHECKIN,
-            tests=lambda x: type(x) is datetime.datetime
+            StateDb.Keys.IS_DONE_AM_CHECKIN_TODAY,
+            tests=lambda x: type(x) is bool
         )
         self.create_key_if_not_exists(
-            StateDb.Keys.LAST_PM_CHECKIN,
-            tests=lambda x: type(x) is datetime.datetime
+            StateDb.Keys.IS_DONE_PM_CHECKIN_TODAY,
+            tests=lambda x: type(x) is bool
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.IS_MISSED_PM_YESTERDAY,
+            tests=lambda x: type(x) is bool
         )
         self.create_key_if_not_exists(
             StateDb.Keys.CURRENT_DATETIME,

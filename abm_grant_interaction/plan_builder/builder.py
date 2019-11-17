@@ -4,6 +4,7 @@ from abm_grant_interaction.interactions import \
     AmCheckin, PmCheckin, Common, FirstMeeting, OffCheckin, Options, \
     possible_plans
 from interaction_engine.planner import MessagerPlanner
+from datetimerange import DateTimeRange
 import datetime
 import math
 import random
@@ -33,16 +34,13 @@ class PlanBuilder:
 
         planner.insert(
             FirstMeeting.first_meeting,
-            post_hook=self._set_first_meeting_to_current_time,
+            post_hook=lambda: state_db.set(
+                state_db.Keys.FIRST_MEETING,
+                self._current_datetime,
+            )
         )
 
         return planner
-
-    def _set_first_meeting_to_current_time(self):
-        state_db.set(
-            state_db.Keys.FIRST_MEETING,
-            self._current_datetime,
-        )
 
     def _build_am_checkin(self, planner=None):
 
@@ -56,8 +54,8 @@ class PlanBuilder:
         planner.insert(
             Common.Messages.closing,
             post_hook=lambda: state_db.set(
-                state_db.Keys.LAST_AM_CHECKIN,
-                self._current_datetime,
+                state_db.Keys.IS_DONE_AM_CHECKIN_TODAY,
+                True
             )
         )
         return planner
@@ -103,8 +101,8 @@ class PlanBuilder:
         planner.insert(
             Common.Messages.closing,
             post_hook=lambda: state_db.set(
-                state_db.Keys.LAST_PM_CHECKIN,
-                self._current_datetime,
+                state_db.Keys.IS_DONE_PM_CHECKIN_TODAY,
+                True,
             )
         )
 
@@ -115,7 +113,16 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
+        planner.insert(Common.Messages.greeting)
+        if self._is_time_for_status_update():
+            planner.insert(OffCheckin.Messages.give_status)
+        planner.insert(Options.options)
+        planner.insert(Common.Messages.closing)
+
         return planner
+
+    def _is_time_for_status_update(self):
+        return self._is_done_am_checkin_today and self._current_datetime < self._pm_checkin_datetime
 
     def _bkt_update_pL(self, observations):
         self._bkt = self._bkt.update(observations)
@@ -127,56 +134,22 @@ class PlanBuilder:
         return not state_db.is_set(state_db.Keys.FIRST_MEETING)
 
     def _is_am_checkin(self):
-        return self._is_time_to_checkin(
-            self._last_am_checkin,
-            self._am_checkin_time,
+        is_time_window = _is_during_checkin_time_window(
+            self._current_datetime,
+            self._am_checkin_datetime,
             self._mins_before_checkin_allowed,
-            self._mins_after_checkin_allowed
+            self._mins_after_checkin_allowed,
         )
+        return is_time_window and not self._is_done_am_checkin_today
 
     def _is_pm_checkin(self):
-        return self._is_time_to_checkin(
-            self._last_pm_checkin,
-            self._pm_checkin_time,
+        is_time_window = _is_during_checkin_time_window(
+            self._current_datetime,
+            self._pm_checkin_datetime,
             self._mins_before_checkin_allowed,
-            self._mins_after_checkin_allowed
-        )
-
-    def _is_time_to_checkin(self, last_checkin, set_time, mins_before, mins_after):
-
-        if last_checkin.date() == self._current_datetime.date():
-            return False
-
-        if _is_time_within_range(
-                set_time,
-                self._current_datetime,
-                mins_before=mins_before,
-                mins_after=mins_after,
-        ):
-            return True
-        else:
-            return False
-
-    def _is_missed_am(self):
-        return self._is_missed_checkin(
-            self._am_checkin_time,
             self._mins_after_checkin_allowed,
-            self._last_am_checkin,
         )
-
-    def _is_missed_pm(self):
-        return self._is_missed_checkin(
-            self._pm_checkin_time,
-            self._mins_after_checkin_allowed,
-            self._last_pm_checkin,
-        )
-
-    def _is_missed_checkin(self, checkin_time, time_after_allowed, last_checkin):
-        checkin_datetime = _put_time_to_datetime(checkin_time, self._current_datetime)
-        return not (
-                checkin_datetime + datetime.timedelta(minutes=time_after_allowed) > self._current_datetime
-                and last_checkin.date() != self._current_datetime.date()
-        )
+        return is_time_window and not self._is_done_pm_checkin_today
 
     def _is_met_steps_goal_today(self):
         return self._steps_today >= self._goal_today
@@ -190,16 +163,24 @@ class PlanBuilder:
         return state_db.get(state_db.Keys.AM_CHECKIN_TIME)
 
     @property
+    def _am_checkin_datetime(self):
+        return self._put_time_to_datetime(self._am_checkin_time, self._current_datetime)
+
+    @property
     def _pm_checkin_time(self):
         return state_db.get(state_db.Keys.PM_CHECKIN_TIME)
 
     @property
-    def _last_am_checkin(self):
-        return state_db.get(state_db.Keys.LAST_AM_CHECKIN)
+    def _pm_checkin_datetime(self):
+        return self._put_time_to_datetime(self._pm_checkin_time, self._current_datetime)
 
     @property
-    def _last_pm_checkin(self):
-        return state_db.get(state_db.Keys.LAST_PM_CHECKIN)
+    def _is_done_am_checkin_today(self):
+        return state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY)
+
+    @property
+    def _is_done_pm_checkin_today(self):
+        return state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY)
 
     @property
     def _mins_before_checkin_allowed(self):
@@ -247,17 +228,16 @@ class PlanBuilder:
         state_db.set(state_db.Keys.BKT_pS, pS)
         state_db.set(state_db.Keys.BKT_pG, pG)
 
-
-def _is_time_within_range(time, reference_datetime, mins_before, mins_after):
-    time_datetime = _put_time_to_datetime(time, reference_datetime)
-    return (
-            reference_datetime + datetime.timedelta(minutes=mins_after)
-            >=
-            time_datetime
-            >=
-            reference_datetime - datetime.timedelta(minutes=mins_before)
-    )
+    @staticmethod
+    def _put_time_to_datetime(time, datetime_):
+        return datetime_.replace(hour=time.hour, minute=time.minute)
 
 
-def _put_time_to_datetime(time, datetime_):
-    return datetime_.replace(hour=time.hour, minute=time.minute)
+def _is_during_checkin_time_window(time, checkin_datetime, mins_before_allowed, mins_after_allowed):
+    start = checkin_datetime - datetime.timedelta(minutes=mins_before_allowed)
+    end = checkin_datetime + datetime.timedelta(minutes=mins_after_allowed)
+    return _is_in_range(start, end, time)
+
+
+def _is_in_range(start, end, time):
+    return time in DateTimeRange(start_datetime=start, end_datetime=end)

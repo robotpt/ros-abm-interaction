@@ -28,6 +28,7 @@ REQUIRED = [
     'interaction_engine',
     'robotpt_common_utils',
     'pyyaml',
+    'datetimerange',
     # 'requests', 'maya', 'records',
 ]
 
