@@ -9,7 +9,7 @@ import datetime
 DAYS_IN_A_WEEK = 7
 
 
-class GoalSetter:
+class GoalSetter(FitbitReader):
 
     def __init__(
             self,
@@ -31,7 +31,7 @@ class GoalSetter:
             start_date,
             DAYS_IN_A_WEEK
         )
-        self._fitbit_reader = FitbitReader(
+        super().__init__(
             client_id,
             client_secret,
             min_steps_for_entry_to_be_active,
@@ -48,13 +48,20 @@ class GoalSetter:
 
     def get_week_goal(self, date=datetime.date.today()):
 
-        dates = self._get_past_weeks_dates(date)
-        steps_last_week = self._get_total_active_steps(dates)
+        steps_last_week = self.get_steps_last_week(date)
 
         return self._goal_calculator.get_week_goal(
             steps_last_week=steps_last_week,
             weeks_remaining=self._get_weeks_remaining(date)
         )
+
+    def get_steps_last_week(self, date):
+        dates = self._get_past_weeks_dates(date)
+        return self._get_total_active_steps(dates)
+
+    def get_steps_this_week(self, date):
+        dates = self._get_this_weeks_dates(date)
+        return self._get_total_active_steps(dates)
 
     def get_day_goal(self, date=datetime.date.today()):
         week_goal = self.get_week_goal(date)
