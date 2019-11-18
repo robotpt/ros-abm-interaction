@@ -154,11 +154,10 @@ class PlanBuilder:
         return is_time_window and not self._is_done_am_checkin_today
 
     def is_pm_checkin(self):
-        is_time_window = _is_during_checkin_time_window(
-            self._current_datetime,
-            self._pm_checkin_datetime,
-            self._mins_before_checkin_allowed,
-            self._mins_after_checkin_allowed,
+        return (
+                self._current_datetime >= self._pm_checkin_datetime -
+                datetime.timedelta(minutes=self._mins_before_checkin_allowed) and
+                not self._is_done_pm_checkin_today
         )
 
     def _is_met_steps_goal_today(self):
