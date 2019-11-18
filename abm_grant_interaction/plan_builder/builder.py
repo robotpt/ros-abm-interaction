@@ -15,9 +15,9 @@ class PlanBuilder:
     def build(self):
         if self._is_first_meeting():
             planner = self._build_first_meeting()
-        elif self._is_am_checkin():
+        elif self.is_am_checkin():
             planner = self._build_am_checkin()
-        elif self._is_pm_checkin():
+        elif self.is_pm_checkin():
             planner = self._build_pm_checkin()
         else:
             planner = self._build_off_checkin()
@@ -31,13 +31,16 @@ class PlanBuilder:
 
         planner.insert(
             FirstMeeting.first_meeting,
-            post_hook=lambda: state_db.set(
-                state_db.Keys.FIRST_MEETING,
-                self._current_datetime,
-            )
+            post_hook=self._set_vars_after_first_meeting
         )
 
         return planner
+
+    def _set_vars_after_first_meeting(self):
+        state_db.set(state_db.Keys.FIRST_MEETING, self._current_datetime)
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
+        state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+        state_db.set(state_db.Keys.IS_REDO_SCHEDULE, True)
 
     def _build_am_checkin(self, planner=None):
 
@@ -119,24 +122,29 @@ class PlanBuilder:
         planner.insert(Common.Messages.greeting)
         if self._is_time_for_status_update():
             planner.insert(OffCheckin.Messages.give_status)
-        planner.insert(Options.options)
+        planner.insert(
+            Options.options,
+            post_hook=lambda: state_db.set(
+                state_db.Keys.IS_REDO_SCHEDULE, True
+            )
+        )
         planner.insert(Common.Messages.closing)
 
         return planner
 
-    def _is_time_for_status_update(self):
-        return self._is_done_am_checkin_today and self._current_datetime < self._pm_checkin_datetime
-
-    def _bkt_update_pL(self, observations):
-        self._bkt = self._bkt.update(observations)
-
-    def _bkt_update_full_model(self, observations):
-        self._bkt = self._bkt.fit(observations)
+    def _is_time_for_status_update(self, current_datetime=None):
+        if current_datetime is None:
+            current_datetime = self._current_datetime
+        return (
+                self._is_done_am_checkin_today
+                and not self._is_done_pm_checkin_today
+                and current_datetime < self._pm_checkin_datetime
+        )
 
     def _is_first_meeting(self):
         return not state_db.is_set(state_db.Keys.FIRST_MEETING)
 
-    def _is_am_checkin(self):
+    def is_am_checkin(self):
         is_time_window = _is_during_checkin_time_window(
             self._current_datetime,
             self._am_checkin_datetime,
@@ -145,7 +153,7 @@ class PlanBuilder:
         )
         return is_time_window and not self._is_done_am_checkin_today
 
-    def _is_pm_checkin(self):
+    def is_pm_checkin(self):
         is_time_window = _is_during_checkin_time_window(
             self._current_datetime,
             self._pm_checkin_datetime,
@@ -156,6 +164,13 @@ class PlanBuilder:
 
     def _is_met_steps_goal_today(self):
         return self._steps_today >= self._goal_today
+
+    def _bkt_update_pL(self, observations):
+        self._bkt = self._bkt.update(observations)
+
+    def _bkt_update_full_model(self, observations):
+        self._bkt = self._bkt.fit(observations)
+
 
     @property
     def _current_datetime(self):

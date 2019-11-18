@@ -15,6 +15,7 @@ class StateDb(PickledDatabase):
         IS_DONE_AM_CHECKIN_TODAY = 'is_done_am_checkin_today'
         IS_DONE_PM_CHECKIN_TODAY = 'is_done_pm_checkin_today'
         IS_MISSED_PM_YESTERDAY = 'is_missed_pm_yesterday'
+        IS_REDO_SCHEDULE = 'is_redo_schedule'
         CURRENT_DATETIME = 'current_datetime'
 
         AM_CHECKIN_TIME = 'am_checkin_time'
@@ -78,6 +79,10 @@ class StateDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             StateDb.Keys.IS_MISSED_PM_YESTERDAY,
+            tests=lambda x: type(x) is bool
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.IS_REDO_SCHEDULE,
             tests=lambda x: type(x) is bool
         )
         self.create_key_if_not_exists(
