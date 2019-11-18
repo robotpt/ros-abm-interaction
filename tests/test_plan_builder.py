@@ -246,6 +246,26 @@ class TestPlanBuilder(unittest.TestCase):
                 self.builder._is_time_for_status_update()
             )
 
+    def test_is_pm_checkin_window(self):
+
+        pm_checkin_hour = 18
+        pm_checkin_min = 21
+
+        state_db.set(state_db.Keys.PM_CHECKIN_TIME, datetime.time(pm_checkin_hour, pm_checkin_min))
+
+        for hour, minute in [
+            (pm_checkin_hour%24, pm_checkin_min%60),
+            (pm_checkin_hour%24, pm_checkin_min+1%60),
+            (23, 55),
+        ]:
+            state_db.set(state_db.Keys.CURRENT_DATETIME,
+                         datetime.datetime.now().replace(hour=hour, minute=minute))
+
+            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+            self.assertTrue(
+                self.builder.is_pm_checkin()
+            )
+
     def test_is_missed_am(self):
 
         am_checkin_hour = 8
