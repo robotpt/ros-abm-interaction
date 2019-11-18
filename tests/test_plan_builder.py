@@ -100,6 +100,7 @@ class TestPlanBuilder(unittest.TestCase):
 
         state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, 300)
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+        state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
         hour, minute = 8, 0
         checkin_time = datetime.time(hour, minute)
@@ -122,6 +123,7 @@ class TestPlanBuilder(unittest.TestCase):
         hour, minute = 18, 0
         checkin_time = datetime.time(hour, minute)
         state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
         current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)

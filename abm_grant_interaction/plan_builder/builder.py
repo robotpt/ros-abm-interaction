@@ -48,6 +48,8 @@ class PlanBuilder:
             planner = MessagerPlanner(possible_plans)
 
         planner.insert(Common.Messages.greeting)
+        if self._is_missed_pm_yesterday:
+            planner.insert(Common.Messages.missed_checkin)
         planner.insert(AmCheckin.Messages.set_goal)
         planner.insert(self._build_am_questions())
 
@@ -93,17 +95,19 @@ class PlanBuilder:
             planner = MessagerPlanner(possible_plans)
 
         planner.insert(Common.Messages.greeting)
-        if self._is_met_steps_goal_today():
-            planner.insert(
-                PmCheckin.success_graph,
-                post_hook=lambda: self._bkt_update_pL(True)
-            )
+        if not self._is_done_am_checkin_today:
+            planner.insert(Common.Messages.missed_checkin)
         else:
-            planner.insert(
-                PmCheckin.fail_graph,
-                post_hook=lambda: self._bkt_update_pL(False)
-            )
-
+            if self._is_met_steps_goal_today():
+                planner.insert(
+                    PmCheckin.success_graph,
+                    post_hook=lambda: self._bkt_update_pL(True)
+                )
+            else:
+                planner.insert(
+                    PmCheckin.fail_graph,
+                    post_hook=lambda: self._bkt_update_pL(False)
+                )
         planner.insert(
             Common.Messages.closing,
             post_hook=lambda: state_db.set(
