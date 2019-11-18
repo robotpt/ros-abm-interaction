@@ -160,7 +160,6 @@ class PlanBuilder:
             self._mins_before_checkin_allowed,
             self._mins_after_checkin_allowed,
         )
-        return is_time_window and not self._is_done_pm_checkin_today
 
     def _is_met_steps_goal_today(self):
         return self._steps_today >= self._goal_today
@@ -199,6 +198,18 @@ class PlanBuilder:
     @property
     def _is_done_pm_checkin_today(self):
         return state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY)
+
+    @property
+    def _is_missed_pm_yesterday(self):
+        return state_db.get(state_db.Keys.IS_MISSED_PM_YESTERDAY)
+
+    @property
+    def _is_missed_am_checkin(self):
+        return (
+                not state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY)
+                and self._current_datetime > self._am_checkin_datetime +
+                datetime.timedelta(minutes=self._mins_after_checkin_allowed)
+        )
 
     @property
     def _mins_before_checkin_allowed(self):

@@ -246,6 +246,44 @@ class TestPlanBuilder(unittest.TestCase):
                 self.builder._is_time_for_status_update()
             )
 
+    def test_is_missed_am(self):
+
+        am_checkin_hour = 8
+        am_checkin_min = 40
+
+        state_db.set(state_db.Keys.AM_CHECKIN_TIME, datetime.time(am_checkin_hour, am_checkin_min))
+
+        for hour, minute in [
+            (0, 0),
+            (am_checkin_hour-1%24, am_checkin_min%60),
+            (am_checkin_hour%24, am_checkin_min-1%60),
+            (am_checkin_hour%24, am_checkin_min%60),
+            (am_checkin_hour%24, am_checkin_min+1%60),
+        ]:
+            state_db.set(state_db.Keys.CURRENT_DATETIME,
+                         datetime.datetime.now().replace(hour=hour, minute=minute))
+
+            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+            self.assertFalse(
+                self.builder._is_missed_am_checkin
+            )
+
+        time_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
+        for hour, minute in [
+            (am_checkin_hour%24, am_checkin_min+1%60),
+            (am_checkin_hour+1%24, am_checkin_min%60),
+            (am_checkin_hour+1%24, am_checkin_min+1%60),
+        ]:
+            state_db.set(state_db.Keys.CURRENT_DATETIME,
+                         datetime.datetime.now().replace(hour=hour, minute=minute)
+                         + datetime.timedelta(minutes=time_after_allowed)
+                         )
+
+            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+            self.assertTrue(
+                self.builder._is_missed_am_checkin
+            )
+
     def test_get_set_bkt(self):
 
         pL0, pT0, pS0, pG0 = self.builder._bkt.get_params()
