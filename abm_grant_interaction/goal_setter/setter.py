@@ -83,11 +83,14 @@ class GoalSetter(FitbitReader):
             until=None,
     ):
         session_number = self._session.get_session_num(date)
+
         dates = self._session.get_session_date_range(session_number)
         if until is None:
             return dates
-        else:
-            return [date for date in dates if date < until]
+
+        if type(until) is datetime.datetime:
+            until = until.date()
+        return [date for date in dates if date < until]
 
     def _get_past_weeks_dates(self, date=datetime.date.today()):
         session_number = self._session.get_session_num(date)
@@ -104,7 +107,7 @@ class GoalSetter(FitbitReader):
         dates = lists.make_sure_is_iterable(dates)
         steps = 0
         for date in dates:
-            steps += self._fitbit_reader.get_total_active_steps(date)
+            steps += self.get_total_active_steps(date)
         return steps
 
     def _get_weeks_remaining(self, date):

@@ -14,12 +14,18 @@ class SessionPlanner:
         if start_date is None:
             start_date = datetime.date.today()
 
+        if type(start_date) is datetime.datetime:
+            start_date = start_date.date()
         self._start_date = start_date
         self._days_in_session = days_in_session
 
     def get_days_since_start_date(self, date=None):
+
         if date is None:
             date = datetime.date.today()
+        elif type(date) is datetime.datetime:
+            date = date.date()
+
         if date < self._start_date:
             raise ValueError("Date must not be before the start date")
         return (date - self._start_date).days
