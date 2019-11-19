@@ -66,16 +66,23 @@ class AbmInteraction:
         self._update_scheduler = schedule.Scheduler()
 
         mins_to_update = param_db.get(param_db.Keys.FITBIT_PULL_RATE_MINS)
-        self._update_scheduler.every().day.at("00:05").do(self._update_week_steps_and_goals)
+        self._update_scheduler.every().day.at("02:00").do(self._new_day_update)
         self._update_scheduler.every(mins_to_update).minutes.do(self._update_todays_steps)
 
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
             self._build_checkin_schedule()
             state_db.set(state_db.Keys.IS_REDO_SCHEDULE, False)
+        else:
+            self._init_vars()
 
     def run(self):
         while True:
             self._run_once()
+
+    def _init_vars(self):
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+        state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+        state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
     def _handle_prompted(self):
         if self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
@@ -117,6 +124,8 @@ class AbmInteraction:
         self._update_week_steps_and_goals()
         if not state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY):
             state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, True)
+        else:
+            state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
@@ -153,31 +162,100 @@ if __name__ == '__main__':
     IS_RESET_STATE_DB = False
 
     interaction = AbmInteraction(is_reset_state_db=IS_RESET_STATE_DB)
+    mins_before_allowed = param_db.get(param_db.Keys.MINS_BEFORE_ALLOW_CHECKIN)
+    mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
 
     print("FIRST INTERACTION")
-    interaction._run_once(current_time=make_date_time(8, 0))
+    interaction._run_once(current_time=make_date_time(8, 0, days=0))
     print(state_db)
-
 
     print("OFF CHECKIN")
     interaction._update_todays_steps()
-    interaction._run_once(current_time=make_date_time(8, 0))
-    print(state_db)
+    checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
+    )
 
-
-    print("PM CHECKIN")
+    print("PM CHECKIN - Fail")
     interaction._update_todays_steps()
+    state_db.set(
+        state_db.Keys.STEPS_TODAY,
+        state_db.get(state_db.Keys.STEPS_GOAL) - 1
+    )
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
-    interaction._run_once(current_time=make_date_time(checkin_time.hour, checkin_time.minute))
-    print(state_db)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
+    )
 
     print("OFF CHECKIN")
-    interaction._run_once(current_time=make_date_time(checkin_time.hour, checkin_time.minute))
+    checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
+    )
 
-
-    print("AM CHECKIN")
+    print("Early AM CHECKIN - low automaticity")
     interaction._new_day_update()
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=1))
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=1)
+        - datetime.timedelta(minutes=mins_before_allowed-1)
+    )
 
+    print("Early PM CHECKIN - Success")
+    interaction._update_todays_steps()
+    state_db.set(
+        state_db.Keys.STEPS_TODAY,
+        state_db.get(state_db.Keys.STEPS_GOAL) - 1
+    )
+    checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=1)
+                     - datetime.timedelta(minutes=mins_before_allowed-1)
+    )
+
+    print("Late AM - medium automaticity")
+    interaction._new_day_update()
+    state_db.set(state_db.Keys.BKT_pL, 0.5)
+    checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=2)
+                     + datetime.timedelta(minutes=mins_after_allowed-1)
+    )
+
+    print("Early PM CHECKIN")
+    interaction._update_todays_steps()
+    checkin_time = datetime.time(23, 55)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=2)
+    )
+
+    print("OFF CHECKIN missed am")
+    interaction._update_todays_steps()
+    checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
+    )
+
+    print("PM CHECKIN missed AM")
+    interaction._new_day_update()
+    interaction._update_todays_steps()
+    checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=3)
+    )
+
+    print("AM CHECKIN - high automaticity")
+    interaction._new_day_update()
+    state_db.set(state_db.Keys.BKT_pL, 0.75)
+    checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=4)
+    )
+
+    print("AM CHECKIN missed PM")
+    interaction._new_day_update()
+    checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
+    interaction._run_once(
+        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=5)
+    )
     print(state_db)
