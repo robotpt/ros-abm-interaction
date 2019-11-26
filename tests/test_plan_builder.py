@@ -74,6 +74,7 @@ class TestPlanBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         state_db.set(state_db.Keys.STEPS_GOAL, 100)
         state_db.set(state_db.Keys.STEPS_TODAY, 200)
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         self.assertEqual(
             self.true_plan,
@@ -88,6 +89,7 @@ class TestPlanBuilder(unittest.TestCase):
                 Common.Messages.closing,
             ]
         )
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         state_db.set(state_db.Keys.STEPS_GOAL, 200)
         state_db.set(state_db.Keys.STEPS_TODAY, 100)
@@ -144,6 +146,7 @@ class TestPlanBuilder(unittest.TestCase):
 
         hour, minute = 18, 0
         checkin_time = datetime.time(hour, minute)
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
