@@ -205,7 +205,7 @@ if __name__ == '__main__':
     interaction._update_todays_steps()
     state_db.set(
         state_db.Keys.STEPS_TODAY,
-        state_db.get(state_db.Keys.STEPS_GOAL) - 1
+        state_db.get(state_db.Keys.STEPS_GOAL) + 1
     )
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
     interaction._run_once(
