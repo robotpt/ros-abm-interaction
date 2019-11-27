@@ -67,10 +67,7 @@ class PlanBuilder:
             self._max_ii_questions,
             self._automaticity,
         )
-        questions = []
-        for _ in range(num_ii_qs):
-            questions.append(
-                random.choice([
+        ii_qs = [
                     AmCheckin.where_graph,
                     AmCheckin.Messages.when_question,
                     random.choice([
@@ -78,10 +75,17 @@ class PlanBuilder:
                         AmCheckin.how_remember_graph,
                         AmCheckin.how_motivated_graph,
                     ])
-                ])
-            )
-        for _ in range(self._max_ii_questions - num_ii_qs):
+                ]
+        ii_qs_to_ask = min(len(ii_qs), num_ii_qs)
+
+        questions = list()
+        questions += random.sample(
+            ii_qs,
+            ii_qs_to_ask,
+        )
+        for _ in range(self._max_ii_questions-ii_qs_to_ask):
             questions.append(AmCheckin.Messages.big_5_question)
+
         return questions
 
     def _get_num_ii_questions(self, max_qs, automaticity):
