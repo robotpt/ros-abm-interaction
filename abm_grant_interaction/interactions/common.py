@@ -7,13 +7,49 @@ class Common:
     class Messages:
         greeting = Message(
             content="{greeting}",
-            options=["{greeting}"]*2,
+            options=["{greeting_}"],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        greeting_morning = Message(
+            content="{greeting_morning}",
+            options=["{greeting_}"],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        greeting_afternoon = Message(
+            content="{greeting_afternoon}",
+            options=["{greeting_}"],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        greeting_evening = Message(
+            content="{greeting_evening}",
+            options=["{greeting_}"],
             message_type=Message.Type.MULTIPLE_CHOICE,
             text_populator=text_populator,
         )
         closing = Message(
             content="{goodbye}",
-            options=['{goodbye}']*2,
+            options=['{goodbye_}'],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        closing_morning = Message(
+            content="{goodbye_morning}",
+            options=['{goodbye_}'],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        closing_afternoon = Message(
+            content="{goodbye_afternoon}",
+            options=['{goodbye_}'],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
+        closing_night = Message(
+            content="{goodbye_night}",
+            options=['{goodbye_}'],
             message_type=Message.Type.MULTIPLE_CHOICE,
             text_populator=text_populator,
         )
@@ -24,6 +60,6 @@ class Common:
                 "{neutral_failure}",
                 "{okay_button_response}",
             ],
-            message_type = Message.Type.MULTIPLE_CHOICE,
-            text_populator = text_populator,
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
         )

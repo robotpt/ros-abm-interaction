@@ -7,7 +7,13 @@ from abm_grant_interaction.interactions.options import Options
 
 common_plans = [
     Common.Messages.greeting,
+    Common.Messages.greeting_morning,
+    Common.Messages.greeting_afternoon,
+    Common.Messages.greeting_evening,
     Common.Messages.closing,
+    Common.Messages.closing_morning,
+    Common.Messages.closing_afternoon,
+    Common.Messages.closing_night,
     Common.Messages.missed_checkin,
 ]
 am_checkin_plans = [

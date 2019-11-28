@@ -66,9 +66,7 @@ class TestPlanBuilder(unittest.TestCase):
     def test_build_pm_with_goal_met(self):
         self.true_plan.insert(
             [
-                Common.Messages.greeting,
                 PmCheckin.success_graph,
-                Common.Messages.closing,
             ]
         )
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
@@ -84,9 +82,7 @@ class TestPlanBuilder(unittest.TestCase):
     def test_build_pm_with_goal_fail(self):
         self.true_plan.insert(
             [
-                Common.Messages.greeting,
                 PmCheckin.fail_graph,
-                Common.Messages.closing,
             ]
         )
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)

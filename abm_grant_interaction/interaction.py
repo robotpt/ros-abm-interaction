@@ -160,14 +160,13 @@ def make_date_time(hour, minute, days=None):
 if __name__ == '__main__':
 
     IS_RESET_STATE_DB = False
-
     interaction = AbmInteraction(is_reset_state_db=IS_RESET_STATE_DB)
     mins_before_allowed = param_db.get(param_db.Keys.MINS_BEFORE_ALLOW_CHECKIN)
     mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
-
-    print("FIRST INTERACTION")
-    interaction._run_once(current_time=make_date_time(8, 0, days=0))
-    print(state_db)
+    if 0:
+        print("FIRST INTERACTION")
+        interaction._run_once(current_time=make_date_time(8, 0, days=0))
+        print(state_db)
 
     print("OFF CHECKIN")
     interaction._update_todays_steps()

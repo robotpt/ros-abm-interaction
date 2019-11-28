@@ -13,14 +13,19 @@ import random
 class PlanBuilder:
 
     def build(self):
+        planner = MessagerPlanner(possible_plans)
+
         if self._is_first_meeting():
-            planner = self._build_first_meeting()
-        elif self.is_am_checkin():
-            planner = self._build_am_checkin()
-        elif self.is_pm_checkin():
-            planner = self._build_pm_checkin()
+            self._build_first_meeting(planner)
         else:
-            planner = self._build_off_checkin()
+            self._build_greeting(planner)
+            if self.is_am_checkin():
+                self._build_am_checkin(planner)
+            elif self.is_pm_checkin():
+                self._build_pm_checkin(planner)
+            else:
+                self._build_off_checkin(planner)
+            self._build_closing(planner)
 
         return planner
 
@@ -33,6 +38,27 @@ class PlanBuilder:
             FirstMeeting.first_meeting,
             post_hook=self._set_vars_after_first_meeting
         )
+
+        return planner
+
+    def _build_greeting(self, planner):
+        current_hour = self._current_datetime.hour
+        if current_hour < 12:
+            planner.insert(Common.Messages.greeting_morning)
+        elif current_hour < 18:
+            planner.insert(Common.Messages.greeting_afternoon)
+        else:
+            planner.insert(Common.Messages.greeting_evening)
+        return planner
+
+    def _build_closing(self, planner):
+        current_hour = self._current_datetime.hour
+        if current_hour < 12:
+            planner.insert(Common.Messages.closing_morning)
+        elif current_hour < 19:
+            planner.insert(Common.Messages.closing_afternoon)
+        else:
+            planner.insert(Common.Messages.closing_night)
 
         return planner
 
@@ -98,36 +124,34 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        planner.insert(Common.Messages.greeting)
         if not self._is_done_am_checkin_today:
             planner.insert(Common.Messages.missed_checkin)
         else:
             if self._is_met_steps_goal_today():
                 planner.insert(
                     PmCheckin.success_graph,
-                    post_hook=lambda: self._bkt_update_pL(True)
+                    post_hook=lambda: self._mark_pm_checkin_complete(True)
                 )
             else:
                 planner.insert(
                     PmCheckin.fail_graph,
-                    post_hook=lambda: self._bkt_update_pL(False)
+                    post_hook=lambda: self._mark_pm_checkin_complete(False)
                 )
-        planner.insert(
-            Common.Messages.closing,
-            post_hook=lambda: state_db.set(
-                state_db.Keys.IS_DONE_PM_CHECKIN_TODAY,
-                True,
-            )
-        )
 
         return planner
+
+    def _mark_pm_checkin_complete(self, result):
+        self._bkt_update_pL(result)
+        state_db.set(
+            state_db.Keys.IS_DONE_PM_CHECKIN_TODAY,
+            True,
+        )
 
     def _build_off_checkin(self, planner=None):
 
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        planner.insert(Common.Messages.greeting)
         if self._is_time_for_status_update():
             planner.insert(OffCheckin.Messages.give_status)
         planner.insert(
@@ -136,7 +160,6 @@ class PlanBuilder:
                 state_db.Keys.IS_REDO_SCHEDULE, True
             )
         )
-        planner.insert(Common.Messages.closing)
 
         return planner
 
