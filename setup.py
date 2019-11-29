@@ -29,6 +29,7 @@ REQUIRED = [
     'robotpt_common_utils',
     'pyyaml',
     'datetimerange',
+    'schedule',
     # 'requests', 'maya', 'records',
 ]
 
