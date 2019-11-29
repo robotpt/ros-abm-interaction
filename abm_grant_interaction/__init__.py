@@ -6,6 +6,7 @@ from abm_grant_interaction.data_structures import ParameterDb as _ParameterDb
 from interaction_engine.text_populator import TextPopulator as _TextPopulator
 from interaction_engine.text_populator import DatabasePopulator as _DatabasePopulator
 from interaction_engine.text_populator import VarietyPopulator as _VarietyPopulator
+from robotpt_common_utils import user_input
 
 
 # Should be in 'resources' directory
@@ -42,7 +43,27 @@ IS_DEBUG = _data['debug']
 
 # Get path to Fitbit secret client info
 _fitbit_secrets_path = _os.path.join(_resources_directory, _fitbit_secrets_file)
-assert _os.path.exists(_fitbit_secrets_path)
+if not _os.path.exists(_fitbit_secrets_path):
+    print("Please pair with your fitbit account")
+
+    is_have_account = user_input.is_yes(input("Do you have an app? (yes or no)\n>>> "))
+    if not is_have_account:
+        print(
+            "Here is how to create a fitbit app to give this program access to your fitbit data\n" 
+            "\t1. Go to https://dev.fitbit.com/apps/new\n" 
+            "\t2. Fill in the form information\n" 
+            "\t\t * For websites you can use https://www.google.com)\n" 
+            "\t\t * For 'OAuth 2.0 Application Type' select 'Personal'\n" 
+            "\t\t * For 'Callback URL' put 'http://127.0.0.1:8080/'\n" 
+            "\t\t * And request 'Read Only' data access\n" 
+            "\t3. Navigate to see the app details for the client ID and client secret"
+        )
+        input("Hit 'Enter' to continue")
+    client_id = input("Please enter your app's client id\n>>> ")
+    client_secret = input("Please enter your app's client secret\n>>> ")
+    with open(_fitbit_secrets_path, 'w') as f:
+        _yaml.dump({'client_id': client_id, 'client_secret': client_secret}, f)
+    print(f"File '{_fitbit_secrets_path}' created - please modify that file if needed")
 
 
 # Create state and param databases

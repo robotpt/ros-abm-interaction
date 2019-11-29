@@ -3,4 +3,4 @@ TODO
 
 * Add support for missed checkins
 * Make AM questions not with replacement
-* Remove day and nighttime specific greetings + stupid greetings
+* Make prompt to setup config file if it doesn't exist
