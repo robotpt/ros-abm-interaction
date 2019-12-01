@@ -8,26 +8,19 @@ from interaction_engine.interfaces import TerminalInterface
 from abm_grant_interaction.plan_builder.builder import PlanBuilder
 import datetime
 import schedule
+from freezegun import freeze_time
 
 
 class AbmInteraction:
 
     def __init__(
             self,
-            current_datetime=None,
             interface=None,
             is_reset_state_db=False,
     ):
 
         if is_reset_state_db:
             state_db.reset()
-
-        if current_datetime is None:
-            if state_db.is_set(state_db.Keys.CURRENT_DATETIME):
-                current_datetime = self._current_datetime
-            else:
-                current_datetime = datetime.datetime.now()
-        self._current_datetime = current_datetime
 
         self._plan_builder = PlanBuilder()
         if interface is None:
@@ -36,7 +29,7 @@ class AbmInteraction:
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
             start_date = state_db.get(state_db.Keys.FIRST_MEETING)
         else:
-            start_date = self._current_datetime-datetime.timedelta(days=7)
+            start_date = datetime.datetime.now()-datetime.timedelta(days=7)
 
         self._goal_setter = GoalSetter(
             client_id=
@@ -90,9 +83,7 @@ class AbmInteraction:
         else:
             self._run_once()
 
-    def _run_once(self, current_time=datetime.datetime.now()):
-
-        self._current_datetime = current_time
+    def _run_once(self):
 
         plan = self._plan_builder.build()
         interaction_engine = InteractionEngine(self._interface, plan, possible_plans)
@@ -117,7 +108,7 @@ class AbmInteraction:
     def _update_todays_steps(self):
         state_db.set(
             state_db.Keys.STEPS_TODAY,
-            self._goal_setter.get_total_active_steps(self._current_datetime)
+            self._goal_setter.get_total_active_steps(datetime.datetime.now())
         )
 
     def _new_day_update(self):
@@ -131,7 +122,7 @@ class AbmInteraction:
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
     def _update_week_steps_and_goals(self):
-        date = self._current_datetime
+        date = datetime.datetime.now()
         day_goal = self._goal_setter.get_day_goal(date)
         steps_last_week = self._goal_setter.get_steps_last_week(date)
         steps_this_week = self._goal_setter.get_steps_this_week(date)
@@ -139,14 +130,6 @@ class AbmInteraction:
         state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, day_goal)
         state_db.set(state_db.Keys.STEPS_LAST_WEEK, steps_last_week)
         state_db.set(state_db.Keys.STEPS_THIS_WEEK, steps_this_week)
-
-    @property
-    def _current_datetime(self):
-        return state_db.get(state_db.Keys.CURRENT_DATETIME)
-
-    @_current_datetime.setter
-    def _current_datetime(self, value):
-        state_db.set(state_db.Keys.CURRENT_DATETIME, value)
 
 
 def make_date_time(hour, minute, days=None):
@@ -164,16 +147,16 @@ if __name__ == '__main__':
     mins_before_allowed = param_db.get(param_db.Keys.MINS_BEFORE_ALLOW_CHECKIN)
     mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
 
+
     print("FIRST INTERACTION")
-    interaction._run_once(current_time=make_date_time(8, 0, days=0))
-    print(state_db)
+    with freeze_time("2019-11-1 8:05:00"):
+        interaction._run_once()
 
     print("OFF CHECKIN")
     interaction._update_todays_steps()
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
-    )
+    with freeze_time(f"2019-11-1 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("PM CHECKIN - Fail")
     interaction._update_todays_steps()
@@ -182,23 +165,20 @@ if __name__ == '__main__':
         state_db.get(state_db.Keys.STEPS_GOAL) - 1
     )
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
-    )
+    with freeze_time(f"2019-11-1 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("OFF CHECKIN")
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
-    )
+    with freeze_time(f"2019-11-1 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("Early AM CHECKIN - low automaticity")
     interaction._new_day_update()
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=1)
-        - datetime.timedelta(minutes=mins_before_allowed-1)
-    )
+    with freeze_time(f"2019-11-2 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00") as frozen_datetime:
+        frozen_datetime.tick(delta=datetime.timedelta(minutes=mins_before_allowed-1))
+        interaction._run_once()
 
     print("Early PM CHECKIN - Success")
     interaction._update_todays_steps()
@@ -207,54 +187,47 @@ if __name__ == '__main__':
         state_db.get(state_db.Keys.STEPS_GOAL) + 1
     )
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=1)
-                     - datetime.timedelta(minutes=mins_before_allowed-1)
-    )
+    with freeze_time(f"2019-11-2 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00") as frozen_datetime:
+        frozen_datetime.tick(delta=datetime.timedelta(minutes=mins_before_allowed-1))
+        interaction._run_once()
 
     print("Late AM - medium automaticity")
     interaction._new_day_update()
     state_db.set(state_db.Keys.BKT_pL, 0.5)
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=2)
-                     + datetime.timedelta(minutes=mins_after_allowed-1)
-    )
+    with freeze_time(f"2019-11-3 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00") as frozen_datetime:
+        frozen_datetime.tick(delta=datetime.timedelta(minutes=mins_after_allowed-1))
+        interaction._run_once()
 
-    print("Early PM CHECKIN")
+    print("Late PM CHECKIN")
     interaction._update_todays_steps()
     checkin_time = datetime.time(23, 55)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=2)
-    )
+    with freeze_time(f"2019-11-3 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("OFF CHECKIN missed am")
     interaction._update_todays_steps()
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=0)
-    )
+    with freeze_time(f"2019-11-4 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00") as frozen_datetime:
+        frozen_datetime.tick(delta=datetime.timedelta(minutes=mins_after_allowed+1))
+        interaction._run_once()
 
     print("PM CHECKIN missed AM")
     interaction._new_day_update()
     interaction._update_todays_steps()
     checkin_time = state_db.get(state_db.Keys.PM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=3)
-    )
+    with freeze_time(f"2019-11-4 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("AM CHECKIN - high automaticity")
     interaction._new_day_update()
     state_db.set(state_db.Keys.BKT_pL, 0.75)
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=4)
-    )
+    with freeze_time(f"2019-11-5 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()
 
     print("AM CHECKIN missed PM")
     interaction._new_day_update()
     checkin_time = state_db.get(state_db.Keys.AM_CHECKIN_TIME)
-    interaction._run_once(
-        current_time=make_date_time(checkin_time.hour, checkin_time.minute, days=5)
-    )
-    print(state_db)
+    with freeze_time(f"2019-11-6 {checkin_time.hour:02d}:{checkin_time.minute:02d}:00"):
+        interaction._run_once()

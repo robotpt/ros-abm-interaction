@@ -30,6 +30,7 @@ REQUIRED = [
     'pyyaml',
     'datetimerange',
     'schedule',
+    'freezegun',
     # 'requests', 'maya', 'records',
 ]
 
