@@ -2,6 +2,7 @@ from abm_grant_interaction.plan_builder import builder
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import \
     PmCheckin, Common, FirstMeeting, possible_plans
+from freezegun import freeze_time
 
 from interaction_engine.planner import MessagerPlanner
 from interaction_engine.messager import DirectedGraph, Message
@@ -55,11 +56,9 @@ class TestPlanBuilder(unittest.TestCase):
     def test_select_first_meeting(self):
         self.true_plan.insert(FirstMeeting.first_meeting)
 
+        self.assertFalse(state_db.is_set(state_db.Keys.FIRST_MEETING))
         resulting_plan = self.builder.build()
         self.assertEqual(self.true_plan, resulting_plan)
-
-        self.assertFalse(state_db.is_set(state_db.Keys.FIRST_MEETING))
-        state_db.set(state_db.Keys.CURRENT_DATETIME, datetime.datetime.now())
         simulate_run_plan(resulting_plan)
         self.assertTrue(state_db.is_set(state_db.Keys.FIRST_MEETING))
 
@@ -104,19 +103,20 @@ class TestPlanBuilder(unittest.TestCase):
         checkin_time = datetime.time(hour, minute)
         state_db.set(state_db.Keys.AM_CHECKIN_TIME, checkin_time)
 
-        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
-        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
-
-        self.assertTrue(self.builder.is_am_checkin())
-
-        plan = self.builder._build_am_checkin()
-        for _ in range(len(plan.plan)-1):
-            simulate_run_once(plan)
+        with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
             self.assertTrue(self.builder.is_am_checkin())
-        simulate_run_once(plan)
-        self.assertFalse(self.builder.is_am_checkin())
+
+            plan = self.builder._build_am_checkin()
+            for _ in range(len(plan.plan)-1):
+                simulate_run_once(plan)
+                self.assertTrue(self.builder.is_am_checkin())
+            simulate_run_once(plan)
+            self.assertFalse(self.builder.is_am_checkin())
 
     def test_run_pm(self):
+        am_hour, am_minute = 8, 0
+        am_checkin_time = datetime.time(am_hour, am_minute)
+        state_db.set(state_db.Keys.AM_CHECKIN_TIME, am_checkin_time)
 
         hour, minute = 18, 0
         checkin_time = datetime.time(hour, minute)
@@ -124,19 +124,20 @@ class TestPlanBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
-        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
-        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+        with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
 
-        state_db.set(state_db.Keys.STEPS_TODAY, 300)
-        state_db.set(state_db.Keys.STEPS_GOAL, 600)
+            self.assertFalse(self.builder.is_am_checkin())
 
-        self.assertTrue(self.builder.is_pm_checkin())
-        plan = self.builder._build_pm_checkin()
-        for _ in range(len(plan.plan)-1):
-            simulate_run_once(plan)
+            state_db.set(state_db.Keys.STEPS_TODAY, 300)
+            state_db.set(state_db.Keys.STEPS_GOAL, 600)
+
             self.assertTrue(self.builder.is_pm_checkin())
-        simulate_run_once(plan)
-        self.assertFalse(self.builder.is_pm_checkin())
+            plan = self.builder._build_pm_checkin()
+            for _ in range(len(plan.plan)-1):
+                simulate_run_once(plan)
+                self.assertTrue(self.builder.is_pm_checkin())
+            simulate_run_once(plan)
+            self.assertFalse(self.builder.is_pm_checkin())
 
     def test_run_pm_updates_bkt(self):
 
@@ -146,30 +147,29 @@ class TestPlanBuilder(unittest.TestCase):
         state_db.set(state_db.Keys.PM_CHECKIN_TIME, checkin_time)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
-        current_datetime = datetime.datetime.now().replace(hour=hour, minute=minute)
-        state_db.set(state_db.Keys.CURRENT_DATETIME, current_datetime)
+        with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
 
-        self.assertTrue(self.builder.is_pm_checkin())
+            self.assertTrue(self.builder.is_pm_checkin())
 
-        for _ in range(10):
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
-            state_db.set(state_db.Keys.STEPS_TODAY, 100)
-            state_db.set(state_db.Keys.STEPS_GOAL, 20)
-            plan = self.builder._build_pm_checkin()
-            pL_old = self.builder._bkt.get_automaticity()
-            simulate_run_plan(plan)
-            pL_new = self.builder._bkt.get_automaticity()
-            self.assertLessEqual(pL_old, pL_new)
+            for _ in range(10):
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+                state_db.set(state_db.Keys.STEPS_TODAY, 100)
+                state_db.set(state_db.Keys.STEPS_GOAL, 20)
+                plan = self.builder._build_pm_checkin()
+                pL_old = self.builder._bkt.get_automaticity()
+                simulate_run_plan(plan)
+                pL_new = self.builder._bkt.get_automaticity()
+                self.assertLessEqual(pL_old, pL_new)
 
-        for _ in range(10):
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
-            state_db.set(state_db.Keys.STEPS_TODAY, 10)
-            state_db.set(state_db.Keys.STEPS_GOAL, 20)
-            plan = self.builder._build_pm_checkin()
-            pL_old = self.builder._bkt.get_automaticity()
-            simulate_run_plan(plan)
-            pL_new = self.builder._bkt.get_automaticity()
-            self.assertGreaterEqual(pL_old, pL_new)
+            for _ in range(10):
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+                state_db.set(state_db.Keys.STEPS_TODAY, 10)
+                state_db.set(state_db.Keys.STEPS_GOAL, 20)
+                plan = self.builder._build_pm_checkin()
+                pL_old = self.builder._bkt.get_automaticity()
+                simulate_run_plan(plan)
+                pL_new = self.builder._bkt.get_automaticity()
+                self.assertGreaterEqual(pL_old, pL_new)
 
     def test_get_num_implementation_intention_questions_to_ask(self):
         max_num_qs = 3
@@ -220,32 +220,31 @@ class TestPlanBuilder(unittest.TestCase):
             (pm_checkin_hour-1%24, pm_checkin_min%60),
             (pm_checkin_hour%24, pm_checkin_min-1%60),
         ]:
-            state_db.set(state_db.Keys.CURRENT_DATETIME,
-                         datetime.datetime.now().replace(hour=hour, minute=minute))
+            with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
-            self.assertFalse(
-                self.builder._is_time_for_status_update()
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+                self.assertFalse(
+                    self.builder._is_time_for_status_update()
+                )
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
-            self.assertTrue(
-                self.builder._is_time_for_status_update()
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+                self.assertTrue(
+                    self.builder._is_time_for_status_update()
+                )
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, True)
-            self.assertFalse(
-                self.builder._is_time_for_status_update()
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, True)
+                self.assertFalse(
+                    self.builder._is_time_for_status_update()
+                )
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, True)
-            self.assertFalse(
-                self.builder._is_time_for_status_update()
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, True)
+                self.assertFalse(
+                    self.builder._is_time_for_status_update()
+                )
 
     def test_is_pm_checkin_window(self):
 
@@ -259,13 +258,12 @@ class TestPlanBuilder(unittest.TestCase):
             (pm_checkin_hour%24, pm_checkin_min+1%60),
             (23, 55),
         ]:
-            state_db.set(state_db.Keys.CURRENT_DATETIME,
-                         datetime.datetime.now().replace(hour=hour, minute=minute))
+            with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
 
-            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
-            self.assertTrue(
-                self.builder.is_pm_checkin()
-            )
+                state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+                self.assertTrue(
+                    self.builder.is_pm_checkin()
+                )
 
     def test_is_missed_am(self):
 
@@ -281,13 +279,12 @@ class TestPlanBuilder(unittest.TestCase):
             (am_checkin_hour%24, am_checkin_min%60),
             (am_checkin_hour%24, am_checkin_min+1%60),
         ]:
-            state_db.set(state_db.Keys.CURRENT_DATETIME,
-                         datetime.datetime.now().replace(hour=hour, minute=minute))
+            with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59"):
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
-            self.assertFalse(
-                self.builder._is_missed_am_checkin
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+                self.assertFalse(
+                    self.builder._is_missed_am_checkin
+                )
 
         time_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
         for hour, minute in [
@@ -295,15 +292,13 @@ class TestPlanBuilder(unittest.TestCase):
             (am_checkin_hour+1%24, am_checkin_min%60),
             (am_checkin_hour+1%24, am_checkin_min+1%60),
         ]:
-            state_db.set(state_db.Keys.CURRENT_DATETIME,
-                         datetime.datetime.now().replace(hour=hour, minute=minute)
-                         + datetime.timedelta(minutes=time_after_allowed)
-                         )
+            with freeze_time(f"2011-11-1 {hour:02d}:{minute:02d}:59") as frozen_datetime:
+                frozen_datetime.tick(delta=datetime.timedelta(minutes=time_after_allowed))
 
-            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
-            self.assertTrue(
-                self.builder._is_missed_am_checkin
-            )
+                state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+                self.assertTrue(
+                    self.builder._is_missed_am_checkin
+                )
 
     def test_get_set_bkt(self):
 

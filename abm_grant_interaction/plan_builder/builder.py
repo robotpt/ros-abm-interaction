@@ -42,7 +42,7 @@ class PlanBuilder:
         return planner
 
     def _build_greeting(self, planner):
-        current_hour = self._current_datetime.hour
+        current_hour = datetime.datetime.now().hour
         if current_hour < 12:
             planner.insert(Common.Messages.greeting_morning)
         elif current_hour < 18:
@@ -52,7 +52,7 @@ class PlanBuilder:
         return planner
 
     def _build_closing(self, planner):
-        current_hour = self._current_datetime.hour
+        current_hour = datetime.datetime.now().hour
         if current_hour < 12:
             planner.insert(Common.Messages.closing_morning)
         elif current_hour < 19:
@@ -63,7 +63,7 @@ class PlanBuilder:
         return planner
 
     def _set_vars_after_first_meeting(self):
-        state_db.set(state_db.Keys.FIRST_MEETING, self._current_datetime)
+        state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_REDO_SCHEDULE, True)
@@ -73,14 +73,11 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        planner.insert(Common.Messages.greeting)
         if self._is_missed_pm_yesterday:
             planner.insert(Common.Messages.missed_checkin)
         planner.insert(AmCheckin.Messages.set_goal)
         planner.insert(self._build_am_questions())
-
-        planner.insert(
-            Common.Messages.closing,
+        planner.update_last_inserts_hooks(
             post_hook=lambda: state_db.set(
                 state_db.Keys.IS_DONE_AM_CHECKIN_TODAY,
                 True
@@ -165,7 +162,7 @@ class PlanBuilder:
 
     def _is_time_for_status_update(self, current_datetime=None):
         if current_datetime is None:
-            current_datetime = self._current_datetime
+            current_datetime = datetime.datetime.now()
         return (
                 self._is_done_am_checkin_today
                 and not self._is_done_pm_checkin_today
@@ -177,7 +174,7 @@ class PlanBuilder:
 
     def is_am_checkin(self):
         is_time_window = _is_during_checkin_time_window(
-            self._current_datetime,
+            datetime.datetime.now(),
             self._am_checkin_datetime,
             self._mins_before_checkin_allowed,
             self._mins_after_checkin_allowed,
@@ -186,7 +183,7 @@ class PlanBuilder:
 
     def is_pm_checkin(self):
         return (
-                self._current_datetime >= self._pm_checkin_datetime -
+                datetime.datetime.now() >= self._pm_checkin_datetime -
                 datetime.timedelta(minutes=self._mins_before_checkin_allowed) and
                 not self._is_done_pm_checkin_today
         )
@@ -200,18 +197,13 @@ class PlanBuilder:
     def _bkt_update_full_model(self, observations):
         self._bkt = self._bkt.fit(observations)
 
-
-    @property
-    def _current_datetime(self):
-        return state_db.get(state_db.Keys.CURRENT_DATETIME)
-
     @property
     def _am_checkin_time(self):
         return state_db.get(state_db.Keys.AM_CHECKIN_TIME)
 
     @property
     def _am_checkin_datetime(self):
-        return self._put_time_to_datetime(self._am_checkin_time, self._current_datetime)
+        return self._put_time_to_datetime(self._am_checkin_time, datetime.datetime.now())
 
     @property
     def _pm_checkin_time(self):
@@ -219,7 +211,7 @@ class PlanBuilder:
 
     @property
     def _pm_checkin_datetime(self):
-        return self._put_time_to_datetime(self._pm_checkin_time, self._current_datetime)
+        return self._put_time_to_datetime(self._pm_checkin_time, datetime.datetime.now())
 
     @property
     def _is_done_am_checkin_today(self):
@@ -237,7 +229,7 @@ class PlanBuilder:
     def _is_missed_am_checkin(self):
         return (
                 not state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY)
-                and self._current_datetime > self._am_checkin_datetime +
+                and datetime.datetime.now() > self._am_checkin_datetime +
                 datetime.timedelta(minutes=self._mins_after_checkin_allowed)
         )
 
