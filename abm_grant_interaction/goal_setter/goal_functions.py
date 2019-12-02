@@ -10,10 +10,14 @@ def get_week_goal(
         min_weekly_steps_goal=2000,
         min_improvement_ratio=1.1,
         max_improvement_ratio=2.0,
+        is_raise_exception_at_end_of_study=False
 ):
 
     if weeks_remaining <= 0:
-        raise ValueError("'weeks_remaining' must be greater than 0")
+        if is_raise_exception_at_end_of_study:
+            raise ValueError("'weeks_remaining' must be greater than 0")
+        else:
+            return steps_last_week
 
     if steps_last_week*max_improvement_ratio < min_weekly_steps_goal:
         return min_weekly_steps_goal

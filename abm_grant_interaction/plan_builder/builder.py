@@ -140,6 +140,10 @@ class PlanBuilder:
     def _mark_pm_checkin_complete(self, result):
         self._bkt_update_pL(result)
         state_db.set(
+            state_db.Keys.IS_MET_GOAL,
+            result,
+        )
+        state_db.set(
             state_db.Keys.IS_DONE_PM_CHECKIN_TODAY,
             True,
         )

@@ -63,7 +63,8 @@ class TestCalculateWeekGoal(unittest.TestCase):
                 ValueError,
                 goal_functions.get_week_goal,
                 0,
-                v
+                v,
+                is_raise_exception_at_end_of_study=True,
             )
 
 

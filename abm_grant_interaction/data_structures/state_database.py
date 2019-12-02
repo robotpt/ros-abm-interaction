@@ -32,7 +32,7 @@ class StateDb(PickledDatabase):
         BKT_pT = 'bkt_pT'
         BKT_pS = 'bkt_pS'
         BKT_pG = 'bkt_pG'
-        IS_MET_GOAL_RECORD = 'is_met_goal_record'
+        IS_MET_GOAL = 'is_met_goal'
 
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
         STEPS_GOAL = 'steps_goal'
@@ -152,7 +152,7 @@ class StateDb(PickledDatabase):
             tests=lambda x: math_tools.is_int(x),
         )
         self.create_key_if_not_exists(
-            StateDb.Keys.IS_MET_GOAL_RECORD,
+            StateDb.Keys.IS_MET_GOAL,
         )
         self.create_key_if_not_exists(
             StateDb.Keys.SUGGESTED_STEPS_TODAY,
