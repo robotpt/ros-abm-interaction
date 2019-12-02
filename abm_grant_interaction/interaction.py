@@ -17,6 +17,7 @@ class AbmInteraction:
             self,
             interface=None,
             is_reset_state_db=False,
+            goal_setter=None,
     ):
 
         if is_reset_state_db:
@@ -31,28 +32,30 @@ class AbmInteraction:
         else:
             start_date = datetime.datetime.now()-datetime.timedelta(days=7)
 
-        self._goal_setter = GoalSetter(
-            client_id=
-            param_db.get(param_db.Keys.FITBIT_CLIENT_ID),
-            client_secret=
-            param_db.get(param_db.Keys.FITBIT_CLIENT_SECRET),
-            start_date=start_date,
-            min_steps_for_entry_to_be_active=
-            param_db.get(param_db.Keys.STEPS_PER_MINUTE_FOR_ACTIVE),
-            max_contiguous_non_active_entries_for_continuous_session=
-            param_db.get(param_db.Keys.CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK),
-            min_consecutive_active_entries_to_count_as_activity=
-            param_db.get(param_db.Keys.ACTIVE_MINS_TO_REGISTER_ACTIVITY),
-            num_weeks=
-            param_db.get(param_db.Keys.WEEKS_WITH_ROBOT),
-            final_week_goal=
-            param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
-            min_weekly_steps_goal=
-            param_db.get(param_db.Keys.MIN_WEEKLY_STEPS_GOAL),
-            week_goal_min_improvement_ratio=1.1,
-            week_goal_max_improvement_ratio=2.0,
-            daily_goal_min_to_max_ratio=2.5,
-        )
+        if goal_setter is None:
+            goal_setter = GoalSetter(
+                client_id=
+                param_db.get(param_db.Keys.FITBIT_CLIENT_ID),
+                client_secret=
+                param_db.get(param_db.Keys.FITBIT_CLIENT_SECRET),
+                start_date=start_date,
+                min_steps_for_entry_to_be_active=
+                param_db.get(param_db.Keys.STEPS_PER_MINUTE_FOR_ACTIVE),
+                max_contiguous_non_active_entries_for_continuous_session=
+                param_db.get(param_db.Keys.CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK),
+                min_consecutive_active_entries_to_count_as_activity=
+                param_db.get(param_db.Keys.ACTIVE_MINS_TO_REGISTER_ACTIVITY),
+                num_weeks=
+                param_db.get(param_db.Keys.WEEKS_WITH_ROBOT),
+                final_week_goal=
+                param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
+                min_weekly_steps_goal=
+                param_db.get(param_db.Keys.MIN_WEEKLY_STEPS_GOAL),
+                week_goal_min_improvement_ratio=1.1,
+                week_goal_max_improvement_ratio=2.0,
+                daily_goal_min_to_max_ratio=2.5,
+            )
+        self._goal_setter = goal_setter
 
         self._update_week_steps_and_goals()
         self._checkin_scheduler = schedule.Scheduler()
@@ -77,8 +80,10 @@ class AbmInteraction:
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
-    def _handle_prompted(self):
-        if self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
+    def handle_prompt(self):
+        if not state_db.is_set(state_db.Keys.FIRST_MEETING):
+            self._run_once()
+        elif self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
             self._checkin_scheduler.next_run()
         else:
             self._run_once()

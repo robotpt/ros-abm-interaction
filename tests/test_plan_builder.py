@@ -2,46 +2,14 @@ from abm_grant_interaction.plan_builder import builder
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import \
     PmCheckin, Common, FirstMeeting, possible_plans
+from abm_grant_interaction.testing_utils.simulate_messages import  \
+    simulate_run_plan, simulate_run_once
 from freezegun import freeze_time
 
 from interaction_engine.planner import MessagerPlanner
-from interaction_engine.messager import DirectedGraph, Message
 
 import unittest
 import datetime
-
-
-def simulate_run_plan(plan):
-    while plan.is_active:
-        simulate_run_once(plan)
-
-
-messagers = dict()
-for m in possible_plans:
-    messagers[m.name] = m
-
-
-def simulate_run_once(plan, is_populate_messages=False):
-
-    message_name, pre_hook, post_hook = plan.pop_plan(is_return_hooks=True)
-
-    pre_hook()
-    if is_populate_messages:
-        populate_messages(message_name)
-    post_hook()
-
-
-def populate_messages(message_name):
-    messager = messagers[message_name]
-    if type(messager) is Message:
-        messages = [messager]
-    elif type(messager) is DirectedGraph:
-        messages = []
-        for node in messager.get_nodes():
-            messages.append(messager.get_message(node))
-    for message in messages:
-        message.content
-        message.options
 
 
 class TestPlanBuilder(unittest.TestCase):
