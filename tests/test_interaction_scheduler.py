@@ -21,7 +21,7 @@ class TestAbmInteraction(unittest.TestCase):
         self._mock_fitbit = fitbit_patcher.start()
         self.set_steps_per_day(300)
 
-        run_once_patcher = mock.patch('abm_grant_interaction.abm_interaction.AbmInteraction.run_once')
+        run_once_patcher = mock.patch('abm_grant_interaction.abm_interaction.AbmInteraction._build_and_run_plan')
         self._mock_run_once = run_once_patcher.start()
         self._mock_run_once.side_effect = self.build_and_simulate_plan
 
@@ -63,15 +63,16 @@ class TestAbmInteraction(unittest.TestCase):
     def test_check_first_run(self):
 
         self.assertFalse(state_db.is_set(state_db.Keys.FIRST_MEETING))
-        self.abm_interaction.handle_prompt(is_prompt=True)
+        self.abm_interaction.set_prompt_to_handle()
+        self.abm_interaction.run_scheduler_once()
         self.assertTrue(state_db.is_set(state_db.Keys.FIRST_MEETING))
         self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
         self.assertFalse(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
 
-    def test_follow_recommendations(self):
+    def test_prompt_interactions(self):
         """
         Note that the steps goals and numbers get in a weird positive feedback loop because of how I
-        spoofed the fitbit reader
+        monkey patched the fitbit reader
         """
 
         num_days = param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)*7
@@ -88,7 +89,8 @@ class TestAbmInteraction(unittest.TestCase):
             pm_checkin_datetime = self.get_pm_checkin_datetime(0, initial_datetime)
             frozen_datetime.move_to(pm_checkin_datetime)
             self.update_day_steps()
-            self.abm_interaction.run_once()
+            self.abm_interaction.set_prompt_to_handle()
+            self.abm_interaction.run_scheduler_once()
             self.update_after_am_checkin()
 
             self.assertTrue(state_db.is_set(state_db.Keys.FIRST_MEETING))
@@ -101,8 +103,14 @@ class TestAbmInteraction(unittest.TestCase):
                 am_checkin_datetime = self.get_am_checkin_datetime(day, initial_datetime)
                 frozen_datetime.move_to(am_checkin_datetime)
                 self.abm_interaction._new_day_update()
-                self.abm_interaction.run_once()
+                self.abm_interaction.set_prompt_to_handle()
+                self.abm_interaction.run_scheduler_once()
                 self.update_after_am_checkin()
+
+                # Run non consequential off-checkin
+                for _ in range(2):
+                    self.abm_interaction.set_prompt_to_handle()
+                    self.abm_interaction.run_scheduler_once()
 
                 self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
                 self.assertFalse(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
@@ -110,12 +118,85 @@ class TestAbmInteraction(unittest.TestCase):
                 pm_checkin_datetime = self.get_pm_checkin_datetime(day, initial_datetime)
                 frozen_datetime.move_to(pm_checkin_datetime)
                 self.update_day_steps()
-                self.abm_interaction.run_once()
+                self.abm_interaction.set_prompt_to_handle()
+                self.abm_interaction.run_scheduler_once()
 
                 self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
                 self.assertTrue(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
                 self.assertTrue(state_db.get(state_db.Keys.IS_MET_GOAL))
 
+                # Run non consequential off-checkin
+                for _ in range(2):
+                    self.abm_interaction._build_and_run_plan()
+
+    def test_scheduler_for_updates_and_running_full_interaction(self):
+        """
+        Note that the steps goals and numbers get in a weird positive feedback loop because of how I
+        monkey patched the fitbit reader
+        """
+
+        num_days = param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)*7
+
+        initial_datetime = datetime.datetime(
+            year=2019, month=1, day=1, hour=8, minute=6, second=3
+        )
+        with freeze_time(initial_datetime) as frozen_datetime:
+            state_db.reset()
+            self.abm_interaction = AbmInteraction()
+
+            self.update_after_first_meeting()
+
+            pm_checkin_datetime = self.get_pm_checkin_datetime(0, initial_datetime)
+            frozen_datetime.move_to(pm_checkin_datetime)
+            self.update_day_steps()
+            self.abm_interaction.run_scheduler_once()
+            self.update_after_am_checkin()
+
+            self.assertTrue(state_db.is_set(state_db.Keys.FIRST_MEETING))
+            self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
+            self.assertTrue(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
+            self.assertTrue(state_db.get(state_db.Keys.IS_MET_GOAL))
+
+            for day in range(1, num_days + 2):
+
+                # Make sure that the system updates automatically
+                am_checkin_datetime = self.get_am_checkin_datetime(day, initial_datetime)
+                frozen_datetime.move_to(am_checkin_datetime - datetime.timedelta(minutes=2*self.mins_before_allowed))
+                self.abm_interaction.run_scheduler_once()
+                self.assertFalse(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
+                self.assertFalse(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
+
+                # Run non consequential off-checkin
+                for _ in range(2):
+                    self.abm_interaction.set_prompt_to_handle()
+                    self.abm_interaction.run_scheduler_once()
+
+                # Run AM checkin
+                frozen_datetime.move_to(am_checkin_datetime)
+                self.abm_interaction.run_scheduler_once()
+                self.update_after_am_checkin()
+                self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
+                self.assertFalse(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
+
+                # Run non consequential off-checkin
+                for _ in range(2):
+                    self.abm_interaction.set_prompt_to_handle()
+                    self.abm_interaction.run_scheduler_once()
+
+                # Run PM checkin
+                pm_checkin_datetime = self.get_pm_checkin_datetime(day, initial_datetime)
+                frozen_datetime.move_to(pm_checkin_datetime)
+                self.update_day_steps()
+                self.abm_interaction.run_scheduler_once()
+
+                self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
+                self.assertTrue(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
+                self.assertTrue(state_db.get(state_db.Keys.IS_MET_GOAL))
+
+                # Run non consequential off-checkin
+                for _ in range(2):
+                    self.abm_interaction.set_prompt_to_handle()
+                    self.abm_interaction.run_scheduler_once()
 
     @staticmethod
     def get_pm_checkin_datetime(day, initial_datetime):
