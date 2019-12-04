@@ -122,6 +122,10 @@ class AbmInteraction:
             state_db.Keys.STEPS_TODAY,
             self._goal_setter._fitbit_reader.get_total_active_steps(datetime.datetime.now())
         )
+        state_db.set(
+            state_db.Keys.LAST_FITBIT_SYNC,
+            self._goal_setter._fitbit_reader.get_last_sync()
+        )
 
     def _new_day_update(self):
         self._update_week_steps_and_goals()

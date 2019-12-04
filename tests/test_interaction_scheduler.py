@@ -19,6 +19,7 @@ class TestAbmInteraction(unittest.TestCase):
 
         fitbit_patcher = mock.patch('abm_grant_interaction.goal_setter.setter.FitbitReader')
         self._mock_fitbit = fitbit_patcher.start()
+        self._mock_fitbit.return_value.get_last_sync.side_effect = lambda: datetime.datetime.now()
         self.set_steps_per_day(300)
 
         run_once_patcher = mock.patch('abm_grant_interaction.abm_interaction.AbmInteraction._build_and_run_plan')

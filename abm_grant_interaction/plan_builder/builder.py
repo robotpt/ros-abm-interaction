@@ -121,18 +121,27 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
+        last_fitbit_sync = state_db.get(state_db.Keys.LAST_FITBIT_SYNC)
+        max_mins_since_sync = param_db.get(param_db.Keys.MINS_BEFORE_WARNING_ABOUT_FITBIT_NOT_SYNCING)
+        is_synced_recently = datetime.datetime.now() < last_fitbit_sync + datetime.timedelta(minutes=max_mins_since_sync)
+
         if not self._is_done_am_checkin_today:
-            planner.insert(Common.Messages.missed_checkin)
+            planner.insert(
+                Common.Messages.missed_checkin,
+                post_hook=lambda: self._mark_pm_checkin_complete(False),
+            )
+        elif not is_synced_recently:
+            planner.insert(PmCheckin.Messages.no_sync)
         else:
             if self._is_met_steps_goal_today():
                 planner.insert(
                     PmCheckin.success_graph,
-                    post_hook=lambda: self._mark_pm_checkin_complete(True)
+                    post_hook=lambda: self._mark_pm_checkin_complete(True),
                 )
             else:
                 planner.insert(
                     PmCheckin.fail_graph,
-                    post_hook=lambda: self._mark_pm_checkin_complete(False)
+                    post_hook=lambda: self._mark_pm_checkin_complete(False),
                 )
 
         return planner
