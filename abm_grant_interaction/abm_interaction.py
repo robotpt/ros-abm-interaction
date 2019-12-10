@@ -1,3 +1,4 @@
+#! /bin/python3.6
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import possible_plans
 from abm_grant_interaction.goal_setter.setter import GoalSetter
@@ -60,6 +61,7 @@ class AbmInteraction:
         self._goal_setter = goal_setter
 
         self._update_week_steps_and_goals()
+        self._update_todays_steps()
 
         self._checkin_scheduler = schedule.Scheduler()
         self._update_scheduler = schedule.Scheduler()

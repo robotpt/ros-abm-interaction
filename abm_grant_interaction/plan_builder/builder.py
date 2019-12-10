@@ -121,16 +121,12 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        last_fitbit_sync = state_db.get(state_db.Keys.LAST_FITBIT_SYNC)
-        max_mins_since_sync = param_db.get(param_db.Keys.MINS_BEFORE_WARNING_ABOUT_FITBIT_NOT_SYNCING)
-        is_synced_recently = datetime.datetime.now() < last_fitbit_sync + datetime.timedelta(minutes=max_mins_since_sync)
-
         if not self._is_done_am_checkin_today:
             planner.insert(
                 Common.Messages.missed_checkin,
                 post_hook=lambda: self._mark_pm_checkin_complete(False),
             )
-        elif not is_synced_recently:
+        elif not self._is_synced_recently():
             planner.insert(PmCheckin.Messages.no_sync)
         else:
             if self._is_met_steps_goal_today():
@@ -145,6 +141,13 @@ class PlanBuilder:
                 )
 
         return planner
+
+    def _is_synced_recently(self):
+        last_fitbit_sync = state_db.get(state_db.Keys.LAST_FITBIT_SYNC)
+        max_mins_since_sync = param_db.get(param_db.Keys.MINS_BEFORE_WARNING_ABOUT_FITBIT_NOT_SYNCING)
+        is_synced_recently = datetime.datetime.now() < last_fitbit_sync + datetime.timedelta(
+            minutes=max_mins_since_sync)
+        return is_synced_recently
 
     def _mark_pm_checkin_complete(self, result):
         self._bkt_update_pL(result)
@@ -162,8 +165,11 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        if self._is_time_for_status_update():
+        if not self._is_synced_recently():
+            planner.insert(PmCheckin.Messages.no_sync)
+        elif self._is_time_for_status_update():
             planner.insert(OffCheckin.Messages.give_status)
+
         planner.insert(
             Options.options,
             post_hook=lambda: state_db.set(
@@ -173,13 +179,11 @@ class PlanBuilder:
 
         return planner
 
-    def _is_time_for_status_update(self, current_datetime=None):
-        if current_datetime is None:
-            current_datetime = datetime.datetime.now()
+    def _is_time_for_status_update(self):
         return (
                 self._is_done_am_checkin_today
                 and not self._is_done_pm_checkin_today
-                and current_datetime < self._pm_checkin_datetime
+                and datetime.datetime.now() < self._pm_checkin_datetime
         )
 
     def _is_first_meeting(self):
