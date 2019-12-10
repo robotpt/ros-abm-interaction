@@ -60,6 +60,7 @@ class AbmInteraction:
         self._goal_setter = goal_setter
 
         self._update_week_steps_and_goals()
+
         self._checkin_scheduler = schedule.Scheduler()
         self._update_scheduler = schedule.Scheduler()
 
@@ -77,7 +78,7 @@ class AbmInteraction:
     def run_scheduler_once(self):
         self._update_scheduler.run_pending()
 
-        if self._is_prompt_to_run:
+        if not state_db.is_set(state_db.Keys.FIRST_MEETING) or self._is_prompt_to_run:
             self._build_and_run_plan()
             self._is_prompt_to_run = False
         else:
