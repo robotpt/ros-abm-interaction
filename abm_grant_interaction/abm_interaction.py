@@ -25,7 +25,8 @@ class AbmInteraction:
 
         self._plan_builder = PlanBuilder()
         if interface is None:
-            self._interface = TerminalInterface(state_db)
+            interface = TerminalInterface(state_db)
+        self._interface = interface
 
         start_days_before_first_meeting = datetime.timedelta(days=7)
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
