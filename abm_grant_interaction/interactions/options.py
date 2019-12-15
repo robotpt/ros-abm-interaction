@@ -82,14 +82,12 @@ class Options:
                     'What you call me',
                     'AM checkin time',
                     'PM checkin time',
-                    'My day off',
                     'Nothing'
                 ],
                 transitions=[
                     'set name',
                     'set am checkin',
                     'set pm checkin',
-                    'set day off',
                     'exit'
                 ]
             ),

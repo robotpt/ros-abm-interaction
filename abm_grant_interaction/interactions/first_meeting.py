@@ -130,14 +130,16 @@ class FirstMeeting:
             Node(
                 name='set day off',
                 message=Options.Messages.set_day_off,
-                transitions='confirm day off',
+                transitions='set steps goal',
             ),
+            # THIS NODE IS SKIPPED
             Node(
                 name='confirm day off',
                 message=Options.Messages.confirm_day_off,
                 options=['{affirmative_button_response}', '{oops_button_response}'],
                 transitions=['set steps goal', 'set day off'],
             ),
+            # ---------------------
             Node(
                 name='set steps goal',
                 content=(
@@ -168,8 +170,8 @@ class FirstMeeting:
             Node(
                 name='first closing',
                 content=(
-                    "Whew! *shake_head*That's all. " +
-                    "For any other questions, the humans should know better than me."
+                    "Whew! *shake_head*That's all. "
+                    # + "For any other questions, the humans should know better than me."
                 ),
                 message_type=Message.Type.MULTIPLE_CHOICE,
                 options=['Bye', 'Talk to you later'],
