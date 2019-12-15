@@ -10,6 +10,10 @@ from abm_grant_interaction.plan_builder.builder import PlanBuilder
 import datetime
 import schedule
 from freezegun import freeze_time
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 class AbmInteraction:
@@ -22,6 +26,7 @@ class AbmInteraction:
     ):
 
         if is_reset_state_db:
+            logging.info("Reseting database")
             state_db.reset()
 
         self._plan_builder = PlanBuilder()
@@ -36,6 +41,7 @@ class AbmInteraction:
             start_date = datetime.datetime.now()-start_days_before_first_meeting
 
         if goal_setter is None:
+            logging.info('Creating goal setter')
             goal_setter = GoalSetter(
                 client_id=
                 param_db.get(param_db.Keys.FITBIT_CLIENT_ID),
@@ -93,6 +99,7 @@ class AbmInteraction:
         state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
+        state_db.set(state_db.Keys.IS_REDO_SCHEDULE, False)
 
     def _run_scheduled_if_still_open(self):
         if self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
@@ -101,7 +108,10 @@ class AbmInteraction:
     def _build_and_run_plan(self):
         plan = self._plan_builder.build()
         interaction_engine = InteractionEngine(self._interface, plan, possible_plans)
-        interaction_engine.run()
+        try:
+            interaction_engine.run()
+        except TimeoutError:
+            pass
 
         if state_db.get(state_db.Keys.IS_REDO_SCHEDULE):
             self._build_checkin_schedule()
@@ -126,10 +136,12 @@ class AbmInteraction:
             state_db.Keys.STEPS_TODAY,
             self._goal_setter._fitbit_reader.get_total_active_steps(datetime.datetime.now())
         )
+        logging.info('Updated steps today')
         state_db.set(
             state_db.Keys.LAST_FITBIT_SYNC,
             self._goal_setter._fitbit_reader.get_last_sync()
         )
+        logging.info('Updated last sync time')
 
     def _new_day_update(self):
         self._update_week_steps_and_goals()
@@ -144,8 +156,11 @@ class AbmInteraction:
     def _update_week_steps_and_goals(self):
         date = datetime.datetime.now()
         day_goal = self._goal_setter.get_day_goal(date)
+        logging.info('Updating steps')
         steps_last_week = self._goal_setter.get_steps_last_week(date)
+        logging.info('Updated  steps last weeky')
         steps_this_week = self._goal_setter.get_steps_this_week(date)
+        logging.info('Updated  steps this weeky')
 
         state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, day_goal)
         state_db.set(state_db.Keys.STEPS_LAST_WEEK, steps_last_week)
@@ -166,7 +181,6 @@ if __name__ == '__main__':
     interaction = AbmInteraction(is_reset_state_db=IS_RESET_STATE_DB)
     mins_before_allowed = param_db.get(param_db.Keys.MINS_BEFORE_ALLOW_CHECKIN)
     mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
-
 
     print("FIRST INTERACTION")
     with freeze_time("2019-11-1 8:05:00"):
