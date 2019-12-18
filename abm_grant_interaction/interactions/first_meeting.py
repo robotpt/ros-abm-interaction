@@ -15,7 +15,6 @@ class FirstMeeting:
                     "I won't go on walks with you*wink*. " +
                     "Instead, I'll ask you questions about your plans to walk and " +
                     "keep track of your daily steps by wirelessly talking to your Fitbit watch. "
-                    "Can I tell you how we'll work together?"
             ),
             message_type=Message.Type.MULTIPLE_CHOICE,
             text_populator=text_populator,
@@ -26,7 +25,7 @@ class FirstMeeting:
                     "To help you walk regularly, we'll talk at least twice a day: " +
                     "once in the morning and once in the evening. " +
                     "In the morning, we'll set a walking goal for the day and I'll ask you some questions." +
-                    "These questions will be about your plans to walk or about you." +
+                    "These questions will be about your plans to walk or about you. " +
                     "In the evening, we'll review the day. If you don't meet your walking goal, I may ask you why. "
             ),
             options='Sounds good',
@@ -36,9 +35,9 @@ class FirstMeeting:
         explain_off_checkin = Message(
             content=(
                 "You can also talk to me any other time. " +
-                "I'll be happy to see you. *nod* I can tell you jokes or tell you good things." +
-                "You can ask me to introduce myself, if you'd like me to meet someone new. " +
-                "I can also explain how we'll work together again. " +
+                # "I'll be happy to see you. *nod* I can tell you jokes or tell you good things. " +
+                # "You can ask me to introduce myself, if you'd like me to meet someone new. " +
+                # "I can also explain how we'll work together again. " +
                 "Lastly, you can change what I call you or when we have our morning and evening checkins. "
             ),
             options='Okay',
@@ -47,7 +46,7 @@ class FirstMeeting:
         )
         explain_fitbit = Message(
             content=(
-                    "Now I'll tell you about how I'll work with your Fitbit watch. " +
+                    "Now, I'll tell you about how I'll work with your Fitbit watch. " +
                     "This part is important.*nod* " +
                     "To know how much you walk, I'll talk to your Fitbit watch. " +
                     "Unfortunately, this can take some time. " +
