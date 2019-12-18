@@ -168,7 +168,10 @@ class PlanBuilder:
         if not self._is_synced_recently():
             planner.insert(PmCheckin.Messages.no_sync)
         elif self._is_time_for_status_update():
-            planner.insert(OffCheckin.Messages.give_status)
+            if state_db.get(state_db.Keys.STEPS_TODAY) >= state_db.get(state_db.Keys.STEPS_GOAL):
+                planner.insert(OffCheckin.Messages.give_status_met_goal)
+            else:
+                planner.insert(OffCheckin.Messages.give_status)
 
         planner.insert(
             Options.options,

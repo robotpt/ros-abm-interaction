@@ -35,6 +35,7 @@ first_meeting_plans = [
 ]
 off_checkin_plans = [
     OffCheckin.Messages.give_status,
+    OffCheckin.Messages.give_status_met_goal,
 ]
 option_plans = [
     Options.options,

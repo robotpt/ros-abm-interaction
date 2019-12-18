@@ -21,4 +21,17 @@ class OffCheckin:
             text_populator=text_populator,
         )
 
+        give_status_met_goal = Message(
+            content=(
+                    "Your goal was {'db': '%s'} steps today and " % state_db.Keys.STEPS_GOAL +
+                    "you've done {'db': '%s'} steps already. " % state_db.Keys.STEPS_TODAY +
+                    "Nice job.  We'll review your total progress at our evening checkin at {'db': '%s'}."
+                    % state_db.Keys.PM_CHECKIN_TIME
+            ),
+            options=[
+                '{affirmative_button_response}',
+            ],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
 
