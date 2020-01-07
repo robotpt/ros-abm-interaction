@@ -31,6 +31,7 @@ REQUIRED = [
     'datetimerange',
     'schedule',
     'freezegun',
+    'func_timeout',
     # 'requests', 'maya', 'records',
 ]
 
