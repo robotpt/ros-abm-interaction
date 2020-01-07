@@ -1,4 +1,4 @@
-#! /bin/python3.6
+#!/usr/bin/python
 # Put underscore to avoid showing as public imports
 import os as _os
 import yaml as _yaml
