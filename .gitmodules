@@ -7,9 +7,6 @@
 [submodule "src/interaction-engine"]
 	path = src/interaction-engine
 	url = https://github.com/robotpt/interaction-engine
-[submodule "src/fitbit-reader"]
-	path = src/fitbit-reader
-	url = https://github.com/robotpt/fitbit-reader
 [submodule "src/fitbit-client"]
 	path = src/fitbit-client
 	url = https://github.com/robotpt/fitbit-client
