@@ -64,6 +64,7 @@ class AbmInteraction:
                 week_goal_max_improvement_ratio=2.0,
                 daily_goal_min_to_max_ratio=2.5,
             )
+
         self._goal_setter = goal_setter
 
         self._update_week_steps_and_goals()

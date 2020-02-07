@@ -39,7 +39,6 @@ _config_file_path = _os.path.join(_path_to_top_directory, _config_file)
 # Setup variables from config
 with open(_config_file_path, 'r') as f:
     _data = _yaml.load(f, Loader=_yaml.FullLoader)
-IS_DEBUG = _data['debug']
 
 
 # Get path to Fitbit secret client info
