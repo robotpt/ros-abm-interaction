@@ -1,0 +1,1 @@
+from abm_grant_interaction.goal_setter.setter import GoalSetter

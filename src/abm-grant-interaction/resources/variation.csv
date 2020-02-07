@@ -1,0 +1,270 @@
+Code,Text
+
+_name_or_not,"."
+_name_or_not,"!"
+_name_or_not,", {'db': 'user_name'}."
+_name_or_not,", {'db': 'user_name'}!"
+
+greeting_,Hi
+greeting_,Hello
+greeting_,Hello there
+greeting_,Hi there
+greeting_,Hiya
+greeting_,It's a pleasure to see you
+greeting_,It's great to see you
+greeting_,It's wonderful to see you
+greeting_,It’s fantastic to see you
+greeting_,Nice to see you
+greeting_,There you are
+greeting_,Well hello
+greeting_,Hey there
+greeting_,Ahoy hoy
+greeting,"{greeting_}{_name_or_not}"
+
+greeting_morning,{greeting}
+greeting_morning,Morning{_name_or_not}
+greeting_morning,Good morning{_name_or_not}
+greeting_afternoon,{greeting}
+greeting_afternoon,Good day{_name_or_not}
+greeting_afternoon,Good afternoon{_name_or_not}
+greeting_evening,Good evening{_name_or_not}
+greeting_evening,{greeting}
+
+greeting_sweet,You're a ray of sunshine.
+greeting_sweet,Hey sweet pea.
+greeting_sweet,It's delightful to see you.
+greeting_sweet,It’s lovely to see you.
+greeting_sweet,Seeing you feels like a hug.
+greeting_sweet,Seeing you makes me smile on the inside.
+greeting_sweet,Seeing you makes my circuits skip a beat.
+greeting_sweet,What a joy to see you.
+greeting_afternoon_sweet,You put the good in my afternoon.
+
+goodbye_,"Bye bye"
+goodbye_,"Bye"
+goodbye_,"Bye, I'll miss you"
+goodbye_,"Goodbye"
+goodbye_,"Let's do this again soon"
+goodbye_,"See you later"
+goodbye_,"See you soon"
+goodbye_,"Take care"
+goodbye,"{goodbye_}{_name_or_not}"
+
+goodbye_morning,{goodbye}
+goodbye_morning,"Enjoy your day{_name_or_not}"
+goodbye_morning,"Here’s to a good day{_name_or_not}"
+goodbye_morning,"You have a good day{_name_or_not}"
+goodbye_afternoon,{goodbye}{_name_or_not}
+goodbye_afternoon,Good afternoon{_name_or_not}
+goodbye_afternoon,Good day{_name_or_not}
+goodbye_night,{goodbye}{_name_or_not}
+goodbye_night,"Good night{_name_or_not}"
+goodbye_night,"You have a good night{_name_or_not}"
+
+nice,Nice
+nice,Great
+nice,Terrific
+nice,Excellent
+nice,Perfect
+nice,Marvelous
+nice,Superb
+nice,Wonderful
+nice,Fantastic
+good_job,{nice} job
+good_job,{nice} work
+good_job,{nice} going
+
+exclamation_or_period,!
+exclamation_or_period,.
+
+thank_you,Thank you very much.
+thank_you,Thank you.
+thank_you,Thanks.
+
+affirmative_plus_button_response,Absolutely
+affirmative_plus_button_response,Definitely
+affirmative_plus_button_response,For sure
+affirmative_plus_button_response,Yes
+affirmative_button_response,All right
+affirmative_button_response,Okay
+affirmative_button_response,Sure
+affirmative_button_response,Yes
+okay_button_response,All right
+okay_button_response,Okay
+negative_button_response,No
+negative_button_response,No thanks
+negative_button_response,Not now
+
+thanks_means_a_lot,Thanks!
+thanks_means_a_lot,Thanks. That means a lot.
+thanks_means_a_lot,Thanks. Your opinion means a lot to me.
+thanks_means_a_lot,Wow! Thanks that makes my day.
+
+thanks,Thank you
+thanks,Thanks
+
+Ill_try_that_button_response,I’ll definitely try that
+Ill_try_that_button_response,I’ll try that
+Ill_try_that_button_response,I’ll give that a shot
+maybe_Ill_try_button_response,I may try that
+maybe_Ill_try_button_response,Maybe I'll try that
+maybe_Ill_try_button_response,I may give that a shot
+maybe_Ill_try_button_response,I might give that a shot
+not_for_me_button_response,That’s not for me
+not_for_me_button_response,That’s not my thing
+
+transitional_statement,All right.
+transitional_statement,Alrighty.
+transitional_statement,Gotcha.
+transitional_statement,Okay.
+oops_button_response,"No. Actually, I didn’t mean that"
+oops_button_response,"Oh, I didn’t mean that"
+oops_button_response,"Oops, I didn’t mean that"
+oops_button_response,That’s not what I meant
+
+steps_goal,steps goal
+steps_goal,walking goal
+
+congratulations_steps_goal,"{nice}, you met your {steps_goal}{today_or_not}{exclamation_or_period}"
+congratulations_steps_goal,"{nice}, you reached your {steps_goal}{today_or_not}{exclamation_or_period}"
+congratulations_steps_goal,{good_job} reaching your {steps_goal}{today_or_not}{exclamation_or_period}
+congratulations_steps_goal,{good_job} meeting your {steps_goal}{today_or_not}{exclamation_or_period}
+congrats_meeting_goal,{good_job} meeting *nod*your goal{today_or_not}!
+congrats_meeting_goal,{good_job} with your goal *nod*your goal{today_or_not}!
+congrats_meeting_goal,{congrats} on meeting your goal *nod*your goal{today_or_not}!
+congrats,Congratulations
+congrats,Congrats
+
+happy_praise,You certainly did well today.
+happy_praise,Keep it up!
+happy_praise,I'm proud of the way you worked today.
+happy_praise,That's the way!
+happy_praise,Keep up the good work.
+happy_praise,Nothing can stop you now.
+happy_praise,You're really going to town.
+happy_praise,Now that's what I call a fine job.
+happy_praise,Way to go!
+
+your_goal_is_to_do,Your target is to do
+your_goal_is_to_do,Your goal is to do
+your_goal_is_to_do,Your plan is to do
+your_goal_is_to_do,You plan to do
+your_goal_was_to_do,Your target was to do
+your_goal_was_to_do,Your goal was to do
+your_goal_was_to_do,Your plan was to do
+your_goal_was_to_do,You plan to do
+your_goal_was_to_do,You planned to do
+your_goal_was_to_do,You wanted to do
+
+too_bad_didnt_reach_steps_goal,"{too_bad}, you didn't meet your {steps_goal} today."
+too_bad_didnt_reach_steps_goal,"{too_bad}, you didn't reach the {steps_goal} today."
+too_bad_didnt_reach_steps_goal,You didn't reach your {steps_goal} today.
+too_bad_didnt_reach_steps_goal,You did't walk enough today to meet your {steps_goal}.
+too_bad_didnt_reach_steps_goal,"{too_bad}, you did't walk enough today to meet your {steps_goal}."
+too_bad,Too bad
+too_bad,Unfortunately
+too_bad,Sadly
+
+encourage_after_fail,I'm sure that you can do it next time.
+encourage_after_fail,We'll try again next time.
+encourage_after_fail,Let's do better next time.
+encourage_after_fail,You can meet your goal next time.
+encourage_after_fail,Let's try again next time.
+question_failed_goal,How come you didn't meet your {steps_goal} today?
+question_failed_goal,Why do you think you didn't reach your {steps_goal} today?
+positive_failure,I'll do better next time!
+positive_failure,I'll make it next time!
+neutral_failure,Tomorrow will be better
+neutral_failure,Alright
+apologize_failure,"Sorry, I'll try tomorrow"
+
+
+how_question_busy,{how_question_start_make_sure} are available when you plan to walk{today_or_not}?
+how_question_busy,{how_question_start_make_sure} are free when you plan to walk{today_or_not}?
+how_question_busy,{how_question_start_make_sure} aren't busy when you plan to walk{today_or_not}?
+how_question_busy,{how_question_start_make_sure} aren't doing something when you plan to walk{today_or_not}?
+how_question_busy_short,{how_question_start_make_sure} are available?
+how_question_busy_short,{how_question_start_make_sure} are free?
+how_question_busy_short,{how_question_start_make_sure} aren't busy?
+how_question_busy_short,{how_question_start_make_sure} aren't doing something?
+personality_instruction,How much do you agree with the following?
+personality_instruction,Do you agree {with_the_following}?
+personality_instruction,How strongly do you agree {with_the_following}?
+with_the_following,with the following
+with_the_following,with the statement
+how_question_forget,{how_question_start} help yourself to remember to {walk_or_steps_goal}{today_or_not}?
+how_question_forget,{how_question_start} remind yourself to remember to {walk_or_steps_goal}{today_or_not}?
+how_question_forget,{how_question_start_make_sure} remember to {walk_or_steps_goal}{today_or_not}?
+how_question_forget,{how_question_start_make_sure} think of your steps goal{today_or_not}?
+how_question_forget,{how_question_start_make_sure} think of your walking goal{today_or_not}?
+how_question_forget_short,{how_question_start_make_sure} remember?
+how_question_forget_short,{how_question_start_make_sure} don't forget?
+how_question_not_motivated,{how_question_start} {motivate_to} {walk_or_steps_goal}{today_or_not}?
+how_question_not_motivated_short,{how_question_start} {motivate}?
+motivate,motivate yourself
+motivate,encourage yourself
+motivate_to,motivate yourself to
+motivate_to,get yourself to
+motivate_to,inspire yourself to
+motivate_to,get in the mood to
+motivate_to,help yourself to feel like you want to
+goal_question_start,How many steps
+goal_question_start,What number of steps
+where_question_start,What place
+where_question_start,Where
+where_question_start,In what location
+where_question_start,Which place
+when_question_start,When
+when_question_start,At what time
+when_question_start,What time
+same_where_as_before_post,is that where you'll walk{today_or_not}?
+same_where_as_before_post,is that where you plan to walk{today_or_not}?
+same_when_as_before_pre,Will you walk at
+same_when_as_before_pre,Do you plan to walk at
+same_when_as_before_post,again today?
+confirm,Just making sure
+confirm,Just to make sure that I have this right
+confirm,"Just to double-check,"
+confirm_question,is that right?
+confirm_question,right?
+confirm_question,correct?
+confirm_question,am I right?
+confirm_walk_time,"{confirm}, you plan to walk at"
+confirm_walk_time,"{confirm}, you'll walk at"
+confirm_walk_time,"{confirm}, you will walk at"
+confirm_walk_time,"{confirm}, you are going to walk at"
+same_when_as_before_post,today?
+how_question_start,How will you
+how_question_start,How can you
+how_question_start,What can you do to
+how_question_start_make_sure,{how_question_start} make sure that you
+how_question_start_make_sure,{how_question_start} confirm that you
+how_question_start_make_sure,{how_question_start} check that you
+walk_or_steps_goal,go on a walk
+walk_or_steps_goal,meet your steps goal
+walk_or_steps_goal,walk
+walk_or_steps_goal,reach your steps goal
+i_cant_today,I can't today
+i_cant_today,I'm not able to today
+off_checkin_menu,What would you like?
+off_checkin_menu,Anything I can do for you?
+off_checkin_menu,How can I help you?
+off_checkin_menu,What should we do?
+off_checkin_menu,What can I do for you?
+options_menu,What would you like to change?
+options_menu,What can I help you change?
+options_menu,What would you like to adjust?
+enough,Nothing more
+enough,That's all
+enough,Nothing else
+enough,I'm good
+today_or_not, today
+today_or_not,
+goal_question,{goal_question_start} {walk_question}
+where_question,{where_question_start} {walk_question}
+when_question,{when_question_start} {walk_question}
+walk_question,will you walk{today_or_not}?
+walk_question,do you plan to walk{today_or_not}?
+walk_question,will you go to walk{today_or_not}?
+walk_question,do you plan to go on a walk{today_or_not}?
+walk_question,are you going to walk{today_or_not}?
