@@ -6,6 +6,25 @@ from fitbit_client import FitbitClient
 from robotpt_common_utils import pandas_lib
 
 
+class Walk:
+    MEAN_STEPS_PER_WALK = 'mean_steps_per_walk'
+    MEDIAN_STEPS_PER_WALK = 'median_steps_per_walk'
+    MAX_STEPS_PER_WALK = 'max_steps_per_walk'
+    MIN_STEPS_PER_WALK = 'min_steps_per_walk'
+
+    MEAN_MINUTES_PER_WALK = 'mean_minutes_per_walk'
+    MEDIAN_MINUTES_PER_WALK = 'median_minutes_per_walk'
+    MAX_MINUTES_WALKED = 'max_minutes_walked'
+    MIN_MINUTES_WALKED = 'min_minutes_walked'
+
+    MEAN_STEPS_PER_MINUTE = 'mean_steps_per_minute'
+    MEDIAN_STEPS_PER_MINUTE = 'median_steps_per_minute'
+    MAX_STEPS_PER_MINUTE = 'max_steps_per_minute'
+    MIN_STEPS_PER_MINUTE = 'min_steps_per_minute'
+
+    TOTAL_STEPS = 'total_steps'
+    TOTAL_MINUTES_WALKED = 'total_minutes_walked'
+
 class AbmFitbitClient:
 
     class FitbitApi:
@@ -57,23 +76,23 @@ class AbmFitbitClient:
         steps_column = active_steps[AbmFitbitClient.StepsDataframe.STEPS_COLUMN]
 
         return {
-            'mean steps per walk': statistics.mean(steps_per_walk),
-            'median steps per walk': statistics.median(steps_per_walk),
-            'max steps per walk': max(steps_per_walk),
-            'min steps per walk': min(steps_per_walk),
+            Walk.MEAN_STEPS_PER_WALK: statistics.mean(steps_per_walk),
+            Walk.MEDIAN_STEPS_PER_WALK: statistics.median(steps_per_walk),
+            Walk.MAX_STEPS_PER_WALK: max(steps_per_walk),
+            Walk.MIN_STEPS_PER_WALK: min(steps_per_walk),
 
-            'mean minutes per walk': statistics.mean(minutes_per_walk),
-            'median minutes per walk': statistics.median(minutes_per_walk),
-            'max minutes walked': max(minutes_per_walk),
-            'min minutes walked': min(minutes_per_walk),
+            Walk.MEAN_MINUTES_PER_WALK: statistics.mean(minutes_per_walk),
+            Walk.MEDIAN_MINUTES_PER_WALK: statistics.median(minutes_per_walk),
+            Walk.MAX_MINUTES_WALKED: max(minutes_per_walk),
+            Walk.MIN_MINUTES_WALKED: min(minutes_per_walk),
 
-            'mean steps per minute': steps_column.mean(),
-            'median steps per minute': steps_column.median(),
-            'max steps per minute': steps_column.max(),
-            'min steps per minute': steps_column.min(),
+            Walk.MEAN_STEPS_PER_MINUTE: steps_column.mean(),
+            Walk.MEDIAN_STEPS_PER_MINUTE: steps_column.median(),
+            Walk.MAX_STEPS_PER_MINUTE: steps_column.max(),
+            Walk.MIN_STEPS_PER_MINUTE: steps_column.min(),
 
-            'total steps': steps_column.sum(),
-            'total minutes walked': sum(minutes_per_walk),
+            Walk.TOTAL_STEPS: steps_column.sum(),
+            Walk.TOTAL_MINUTES_WALKED: sum(minutes_per_walk),
         }
 
     def _get_active_dataframe(self, date: datetime.date = None):
@@ -144,8 +163,7 @@ class AbmFitbitClient:
 
 if __name__ == '__main__':
 
-    credentials_path = "/root/ws/catkin_ws/src/abm_interaction/src/fitbit-client/fitbit_client/fitbit_credentials.yaml"
-    fc = AbmFitbitClient(credentials_path)
+    fc = AbmFitbitClient()
     out = fc.get_last_sync()
     print(out)
 
@@ -157,4 +175,7 @@ if __name__ == '__main__':
     print(out)
 
     out = fc.get_active_steps_features(date)
+    print(out)
+
+    out = fc.get_active_steps_features()
     print(out)
