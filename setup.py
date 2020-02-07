@@ -6,6 +6,7 @@ import os
 
 package_dirs = {
     'abm_grant_interaction': os.path.join('src', 'abm-grant-interaction', 'abm_grant_interaction'),
+    'abm_fitbit_client': os.path.join('src', 'abm_fitbit_client'),
     'fitbit_client': os.path.join('src', 'fitbit-client', 'fitbit_client'),
     'fitbit_reader': os.path.join('src', 'fitbit-reader', 'fitbit_reader'),
     'interaction_engine': os.path.join('src', 'interaction-engine', 'interaction_engine'),
