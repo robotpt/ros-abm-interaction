@@ -3,6 +3,7 @@
 import datetime
 import pandas
 import statistics
+import logging
 
 from fitbit_client import FitbitClient
 from robotpt_common_utils import pandas_lib
@@ -56,6 +57,7 @@ class AbmFitbitClient:
             redirect_url=redirect_url,
         )
 
+        self._active_steps_cache = dict()
         self._min_active_steps = min_steps_for_entry_to_be_active
         self._max_inactive_minutes_before_stop = max_contiguous_non_active_entries_for_continuous_session
         self._min_activity_duration = min_consecutive_active_entries_to_count_as_activity
@@ -70,17 +72,59 @@ class AbmFitbitClient:
         str_format = "%Y-%m-%dT%H:%M:%S.%f"
         return datetime.datetime.strptime(last_sync_str, str_format)
 
-    def get_total_active_steps(self, date: datetime.date = None):
-        return self._get_feature_of_active_steps(WalkFeatures.TOTAL_STEPS, date) or 0
+    def get_total_steps(self, date: datetime.date = None):
+        return self._get_feature(
+            WalkFeatures.TOTAL_STEPS,
+            date,
+            0
+        )
 
-    def _get_feature_of_active_steps(self, feature: str, date: datetime.date = None):
+    def get_steps_per_minute(self, date: datetime.date = None):
+        return self._get_feature(
+            WalkFeatures.MEAN_STEPS_PER_MINUTE,
+            date,
+            0.0,
+        )
+
+    def get_durations_for_each_walk(self, date: datetime.date = None):
+        return self._get_feature(
+            WalkFeatures.DURATION_FOR_EACH_WALK,
+            date,
+            none_return=[],
+        )
+
+    def get_steps_for_each_walk(self, date: datetime.date = None):
+        return self._get_feature(
+            WalkFeatures.STEPS_EACH_WALK,
+            date,
+            none_return=[],
+        )
+
+    def _get_feature(self, feature, date: datetime.date = None, none_return: any = 0):
         features = self.get_features_of_active_steps(date)
         if features is None:
-            return None
+            return none_return
         else:
             return features[feature]
 
-    def get_features_of_active_steps(self, date: datetime.date = None):
+    def get_features_of_active_steps(
+            self,
+            date: datetime.date = None,
+    ):
+
+        if date in self._active_steps_cache.keys():
+            logging.info("Steps data read from cache")
+            return self._active_steps_cache[date]
+
+        logging.info("Requesting steps info from Fitbit")
+        features = self._get_features_of_active_steps(date)
+        # Don't cache steps for the day until it's over
+        if date != datetime.datetime.now().date():
+            logging.info("Steps data saved in the cache")
+            self._active_steps_cache[date] = features
+        return features
+
+    def _get_features_of_active_steps(self, date: datetime.date = None):
         active_dataframes = self._get_active_dataframes(date)
         if active_dataframes is None:
             return None
@@ -134,7 +178,10 @@ class AbmFitbitClient:
             self.StepsDataframe.STEPS_COLUMN,
             self._max_inactive_minutes_before_stop,
         )
-        active_dataframes_of_any_length = pandas_lib.split_on_nan(consecutive_active_steps_separated_with_nan, self.StepsDataframe.STEPS_COLUMN)
+        active_dataframes_of_any_length = pandas_lib.split_on_nan(
+            consecutive_active_steps_separated_with_nan,
+            self.StepsDataframe.STEPS_COLUMN,
+        )
 
         active_dataframes_with_min_duration = [
             df
@@ -190,11 +237,11 @@ if __name__ == '__main__':
     out = fc.get_intraday_steps(date_)
     print(out)
 
-    out = fc._get_active_dataframes(date_)
+    out = fc.get_total_steps(date_)
     print(out)
 
-    out = fc.get_features_of_active_steps(date_)
+    out = fc.get_steps_for_each_walk(date_)
     print(out)
 
-    out = fc.get_features_of_active_steps()
+    out = fc.get_durations_for_each_walk()
     print(out)
