@@ -1,0 +1,8 @@
+uint16 year
+uint8 month
+uint8 day
+---
+uint32 total_steps
+float32 steps_per_minute
+uint32[] walk_durations
+uint32[] walk_steps

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.6
+
 import datetime
 import pandas
 import statistics
@@ -6,7 +8,7 @@ from fitbit_client import FitbitClient
 from robotpt_common_utils import pandas_lib
 
 
-class Walk:
+class WalkFeatures:
     MEAN_STEPS_PER_WALK = 'mean_steps_per_walk'
     MEDIAN_STEPS_PER_WALK = 'median_steps_per_walk'
     MAX_STEPS_PER_WALK = 'max_steps_per_walk'
@@ -24,6 +26,10 @@ class Walk:
 
     TOTAL_STEPS = 'total_steps'
     TOTAL_MINUTES_WALKED = 'total_minutes_walked'
+
+    DURATION_FOR_EACH_WALK = 'duration_for_each_walk'
+    STEPS_EACH_WALK = 'steps_each_walk'
+
 
 class AbmFitbitClient:
 
@@ -64,35 +70,48 @@ class AbmFitbitClient:
         str_format = "%Y-%m-%dT%H:%M:%S.%f"
         return datetime.datetime.strptime(last_sync_str, str_format)
 
-    def get_active_steps_features(self, date: datetime.date = None):
+    def get_total_active_steps(self, date: datetime.date = None):
+        return self._get_feature_of_active_steps(WalkFeatures.TOTAL_STEPS, date) or 0
+
+    def _get_feature_of_active_steps(self, feature: str, date: datetime.date = None):
+        features = self.get_features_of_active_steps(date)
+        if features is None:
+            return None
+        else:
+            return features[feature]
+
+    def get_features_of_active_steps(self, date: datetime.date = None):
         active_dataframes = self._get_active_dataframes(date)
         if active_dataframes is None:
             return None
 
-        steps_per_walk = [df[AbmFitbitClient.StepsDataframe.STEPS_COLUMN].sum() for df in active_dataframes]
+        steps_per_walk = [int(df[AbmFitbitClient.StepsDataframe.STEPS_COLUMN].sum()) for df in active_dataframes]
         minutes_per_walk = [len(df) for df in active_dataframes]
 
         active_steps = pandas.concat(active_dataframes)
         steps_column = active_steps[AbmFitbitClient.StepsDataframe.STEPS_COLUMN]
 
         return {
-            Walk.MEAN_STEPS_PER_WALK: statistics.mean(steps_per_walk),
-            Walk.MEDIAN_STEPS_PER_WALK: statistics.median(steps_per_walk),
-            Walk.MAX_STEPS_PER_WALK: max(steps_per_walk),
-            Walk.MIN_STEPS_PER_WALK: min(steps_per_walk),
+            WalkFeatures.MEAN_STEPS_PER_WALK: statistics.mean(steps_per_walk),
+            WalkFeatures.MEDIAN_STEPS_PER_WALK: statistics.median(steps_per_walk),
+            WalkFeatures.MAX_STEPS_PER_WALK: max(steps_per_walk),
+            WalkFeatures.MIN_STEPS_PER_WALK: min(steps_per_walk),
 
-            Walk.MEAN_MINUTES_PER_WALK: statistics.mean(minutes_per_walk),
-            Walk.MEDIAN_MINUTES_PER_WALK: statistics.median(minutes_per_walk),
-            Walk.MAX_MINUTES_WALKED: max(minutes_per_walk),
-            Walk.MIN_MINUTES_WALKED: min(minutes_per_walk),
+            WalkFeatures.MEAN_MINUTES_PER_WALK: statistics.mean(minutes_per_walk),
+            WalkFeatures.MEDIAN_MINUTES_PER_WALK: statistics.median(minutes_per_walk),
+            WalkFeatures.MAX_MINUTES_WALKED: max(minutes_per_walk),
+            WalkFeatures.MIN_MINUTES_WALKED: min(minutes_per_walk),
 
-            Walk.MEAN_STEPS_PER_MINUTE: steps_column.mean(),
-            Walk.MEDIAN_STEPS_PER_MINUTE: steps_column.median(),
-            Walk.MAX_STEPS_PER_MINUTE: steps_column.max(),
-            Walk.MIN_STEPS_PER_MINUTE: steps_column.min(),
+            WalkFeatures.MEAN_STEPS_PER_MINUTE: steps_column.mean(),
+            WalkFeatures.MEDIAN_STEPS_PER_MINUTE: steps_column.median(),
+            WalkFeatures.MAX_STEPS_PER_MINUTE: steps_column.max(),
+            WalkFeatures.MIN_STEPS_PER_MINUTE: steps_column.min(),
 
-            Walk.TOTAL_STEPS: steps_column.sum(),
-            Walk.TOTAL_MINUTES_WALKED: sum(minutes_per_walk),
+            WalkFeatures.TOTAL_STEPS: int(steps_column.sum()),
+            WalkFeatures.TOTAL_MINUTES_WALKED: int(sum(minutes_per_walk)),
+
+            WalkFeatures.DURATION_FOR_EACH_WALK: minutes_per_walk,
+            WalkFeatures.STEPS_EACH_WALK: steps_per_walk,
         }
 
     def _get_active_dataframe(self, date: datetime.date = None):
@@ -167,15 +186,15 @@ if __name__ == '__main__':
     out = fc.get_last_sync()
     print(out)
 
-    date = out.date()
-    out = fc.get_intraday_steps(date)
+    date_ = out.date()
+    out = fc.get_intraday_steps(date_)
     print(out)
 
-    out = fc._get_active_dataframes(date)
+    out = fc._get_active_dataframes(date_)
     print(out)
 
-    out = fc.get_active_steps_features(date)
+    out = fc.get_features_of_active_steps(date_)
     print(out)
 
-    out = fc.get_active_steps_features()
+    out = fc.get_features_of_active_steps()
     print(out)
