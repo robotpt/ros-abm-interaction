@@ -4,7 +4,7 @@ from abm_grant_interaction.interactions import possible_plans
 from abm_grant_interaction.goal_setter.setter import GoalSetter
 
 from interaction_engine import InteractionEngine
-from interaction_engine.interfaces import TerminalInterface
+from interaction_engine.interfaces import TerminalClientAndServerInterface
 
 from abm_grant_interaction.plan_builder.builder import PlanBuilder
 import datetime
@@ -34,7 +34,7 @@ class AbmInteraction:
 
         self._plan_builder = PlanBuilder()
         if interface is None:
-            interface = TerminalInterface(state_db)
+            interface = TerminalClientAndServerInterface(state_db)
         self._interface = interface
         self._fitbit = AbmFitbitClient(
             credentials_file_path=credentials_file_path,

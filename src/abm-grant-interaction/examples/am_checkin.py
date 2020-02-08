@@ -5,7 +5,7 @@ from abm_grant_interaction.interactions.am_checkin import AmCheckin
 
 from interaction_engine import InteractionEngine
 from interaction_engine.planner import MessagerPlanner
-from interaction_engine.interfaces import TerminalInterface
+from interaction_engine.interfaces import TerminalClientAndServerInterface
 
 state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, 600)
 state_db.set(state_db.Keys.AM_CHECKIN_TIME, datetime.time(8, 0))
@@ -36,7 +36,7 @@ for _ in range(3):
     plan_.insert(AmCheckin.Messages.big_5_question)
 plan_.insert(AmCheckin.Messages.closing)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
+ie = InteractionEngine(TerminalClientAndServerInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)

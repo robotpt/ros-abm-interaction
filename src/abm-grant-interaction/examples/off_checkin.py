@@ -5,7 +5,7 @@ from abm_grant_interaction.interactions.common import Common
 
 from interaction_engine import InteractionEngine
 from interaction_engine.planner import MessagerPlanner
-from interaction_engine.interfaces import TerminalInterface
+from interaction_engine.interfaces import TerminalClientAndServerInterface
 
 import datetime
 
@@ -29,7 +29,7 @@ plan_.insert(OffCheckin.Messages.give_status)
 plan_.insert(Options.options)
 plan_.insert(Common.Messages.closing)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
+ie = InteractionEngine(TerminalClientAndServerInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)

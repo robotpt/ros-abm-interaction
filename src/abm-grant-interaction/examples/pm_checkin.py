@@ -4,7 +4,7 @@ import datetime
 
 from interaction_engine import InteractionEngine
 from interaction_engine.planner import MessagerPlanner
-from interaction_engine.interfaces import TerminalInterface
+from interaction_engine.interfaces import TerminalClientAndServerInterface
 
 possible_plans = [
     PmCheckin.Messages.no_sync,
@@ -34,7 +34,7 @@ else:
     else:
         plan_.insert(PmCheckin.fail_graph)
 
-ie = InteractionEngine(TerminalInterface(state_db), plan_, possible_plans)
+ie = InteractionEngine(TerminalClientAndServerInterface(state_db), plan_, possible_plans)
 ie.run()
 
 print(state_db)
