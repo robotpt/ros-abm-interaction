@@ -61,13 +61,14 @@ class RosAbmFitbitClient:
     ):
 
         if date in self._active_steps_cache.keys():
-            rospy.loginfo("Steps read from cache")
+            rospy.loginfo("Steps data read from cache")
             return self._active_steps_cache[date]
 
+        rospy.loginfo("Requesting steps info from Fitbit")
         features = self._fitbit.get_features_of_active_steps(date)
         # Don't cache steps for the day until it's over
         if date != datetime.datetime.now().date():
-            rospy.loginfo("Steps for the day saved in the cache")
+            rospy.loginfo("Steps data saved in the cache")
             self._active_steps_cache[date] = features
         return features
 
