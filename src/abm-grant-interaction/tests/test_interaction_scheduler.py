@@ -17,7 +17,7 @@ class TestAbmInteraction(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        fitbit_patcher = mock.patch('abm_grant_interaction.goal_setter.setter.FitbitReader')
+        fitbit_patcher = mock.patch('abm_grant_interaction.abm_interaction.AbmFitbitClient')
         self._mock_fitbit = fitbit_patcher.start()
         self._mock_fitbit.return_value.get_last_sync.side_effect = lambda: datetime.datetime.now()
         self.set_steps_per_day(300)
@@ -32,7 +32,7 @@ class TestAbmInteraction(unittest.TestCase):
         self.mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)
 
     def set_steps_per_day(self, value):
-        self._mock_fitbit.return_value.get_total_active_steps.return_value = value
+        self._mock_fitbit.return_value.get_total_steps.return_value = value
 
     def build_and_simulate_plan(self):
         plan = self.abm_interaction._plan_builder.build()

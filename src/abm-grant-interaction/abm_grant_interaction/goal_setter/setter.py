@@ -1,4 +1,3 @@
-from fitbit_reader import FitbitReader
 from abm_grant_interaction.goal_setter import goal_calculator, session_planner
 
 from robotpt_common_utils import lists
@@ -13,30 +12,20 @@ class GoalSetter:
 
     def __init__(
             self,
-            client_id=None,
-            client_secret=None,
+            fitbit_active_steps_fn,
             start_date=datetime.date.today()-datetime.timedelta(days=DAYS_IN_A_WEEK),
             num_weeks=6,
-            min_steps_for_entry_to_be_active=20,
-            max_contiguous_non_active_entries_for_continuous_session=3,
-            min_consecutive_active_entries_to_count_as_activity=10,
             final_week_goal=10000,
             min_weekly_steps_goal=2000,
             week_goal_min_improvement_ratio=1.1,
             week_goal_max_improvement_ratio=2.0,
             daily_goal_min_to_max_ratio=2.5,
     ):
+        self._fitbit_active_steps_fn = fitbit_active_steps_fn
         self._num_weeks = num_weeks
         self._session = session_planner.SessionPlanner(
             start_date,
             DAYS_IN_A_WEEK
-        )
-        self._fitbit_reader = FitbitReader(
-            client_id,
-            client_secret,
-            min_steps_for_entry_to_be_active,
-            max_contiguous_non_active_entries_for_continuous_session,
-            min_consecutive_active_entries_to_count_as_activity
         )
         self._goal_calculator = goal_calculator.GoalCalculator(
             final_week_goal,
@@ -115,7 +104,7 @@ class GoalSetter:
         return steps
 
     def _get_total_active_steps_one_date(self, date):
-        return self._fitbit_reader.get_total_active_steps(date)
+        return self._fitbit_active_steps_fn(date)
 
     def _get_weeks_remaining(self, date):
         week_number = self._session.get_session_num(date)

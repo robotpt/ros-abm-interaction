@@ -24,20 +24,18 @@ class ParameterDb(PickledDatabase):
             'minutess_before_warning_about_fitbit_not_syncing'
 
         FITBIT_PULL_RATE_MINS = 'fitbit_pull_rate_minutes'
-        FITBIT_CLIENT_ID = 'fitbit_client_id'
-        FITBIT_CLIENT_SECRET = 'fitbit_client_secret'
 
         MINS_BEFORE_ALLOW_CHECKIN = 'minutes_before_allow_checkin'
         MINS_AFTER_ALLOW_CHECKIN = 'minutes_after_allow_checkin'
 
-    def __init__(self, database_path='parameters.pkl', path_to_fitbit_secrets=None):
+    def __init__(self, database_path='parameters.pkl'):
         super().__init__(database_path=database_path)
-        self._build(path_to_fitbit_secrets)
+        self._build()
 
     def set(self, key, value):
         raise PermissionError("Parameters are read only")
 
-    def _build(self, path_to_fitbit_secrets=None):
+    def _build(self):
 
         check_non_negative_int = [
             lambda x: math_tools.is_int(x),
@@ -99,20 +97,6 @@ class ParameterDb(PickledDatabase):
             2,
             tests=check_non_negative_int
         )
-
-        if path_to_fitbit_secrets is not None:
-            with open(path_to_fitbit_secrets, 'r') as f:
-                data = yaml.load(f, Loader=yaml.FullLoader)
-
-            self.create_key_if_not_exists(
-                ParameterDb.Keys.FITBIT_CLIENT_ID,
-                data['client_id']
-            )
-            self.create_key_if_not_exists(
-                ParameterDb.Keys.FITBIT_CLIENT_SECRET,
-                data['client_secret']
-            )
-
         self.create_key_if_not_exists(
             ParameterDb.Keys.MINS_BEFORE_ALLOW_CHECKIN,
             60,

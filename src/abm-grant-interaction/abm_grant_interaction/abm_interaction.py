@@ -12,6 +12,7 @@ import schedule
 from freezegun import freeze_time
 import logging
 
+from abm_fitbit_client import AbmFitbitClient
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,6 +21,8 @@ class AbmInteraction:
 
     def __init__(
             self,
+            credentials_file_path="fitbit_credentials.yaml",
+            redirect_url="http://localhost",
             interface=None,
             is_reset_state_db=False,
             goal_setter=None,
@@ -33,6 +36,10 @@ class AbmInteraction:
         if interface is None:
             interface = TerminalInterface(state_db)
         self._interface = interface
+        self._fitbit = AbmFitbitClient(
+            credentials_file_path=credentials_file_path,
+            redirect_url=redirect_url,
+        )
 
         start_days_before_first_meeting = datetime.timedelta(days=7)
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
@@ -43,19 +50,9 @@ class AbmInteraction:
         if goal_setter is None:
             logging.info('Creating goal setter')
             goal_setter = GoalSetter(
-                client_id=
-                param_db.get(param_db.Keys.FITBIT_CLIENT_ID),
-                client_secret=
-                param_db.get(param_db.Keys.FITBIT_CLIENT_SECRET),
+                fitbit_active_steps_fn=self._fitbit.get_total_steps,
                 start_date=start_date,
-                min_steps_for_entry_to_be_active=
-                param_db.get(param_db.Keys.STEPS_PER_MINUTE_FOR_ACTIVE),
-                max_contiguous_non_active_entries_for_continuous_session=
-                param_db.get(param_db.Keys.CONSECUTIVE_MINS_INACTIVE_BEFORE_BREAKING_ACTIVITY_STREAK),
-                min_consecutive_active_entries_to_count_as_activity=
-                param_db.get(param_db.Keys.ACTIVE_MINS_TO_REGISTER_ACTIVITY),
-                num_weeks=
-                param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)+1,  # +1 for week with just fitbit
+                num_weeks=param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)+1,  # +1 for week with just fitbit
                 final_week_goal=
                 param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
                 min_weekly_steps_goal=
@@ -135,12 +132,12 @@ class AbmInteraction:
     def _update_todays_steps(self):
         state_db.set(
             state_db.Keys.STEPS_TODAY,
-            self._goal_setter._fitbit_reader.get_total_active_steps(datetime.datetime.now())
+            self._fitbit.get_total_steps(datetime.datetime.now().date())
         )
         logging.info('Updated steps today')
         state_db.set(
             state_db.Keys.LAST_FITBIT_SYNC,
-            self._goal_setter._fitbit_reader.get_last_sync()
+            self._fitbit.get_last_sync()
         )
         logging.info('Updated last sync time')
 
