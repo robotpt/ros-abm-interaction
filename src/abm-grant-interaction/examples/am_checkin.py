@@ -12,8 +12,6 @@ state_db.set(state_db.Keys.AM_CHECKIN_TIME, datetime.time(8, 0))
 state_db.set(state_db.Keys.PM_CHECKIN_TIME, datetime.time(18, 0))
 
 possible_plans = [
-    AmCheckin.Messages.greeting,
-    AmCheckin.Messages.closing,
     AmCheckin.Messages.big_5_question,
     AmCheckin.Messages.when_question,
     AmCheckin.Messages.set_goal,
@@ -25,7 +23,6 @@ possible_plans = [
 
 # Create a plan
 plan_ = MessagerPlanner(possible_plans)
-plan_.insert(AmCheckin.Messages.greeting)
 plan_.insert(AmCheckin.Messages.set_goal)
 plan_.insert(AmCheckin.where_graph)
 plan_.insert(AmCheckin.Messages.when_question)
@@ -34,7 +31,6 @@ plan_.insert(AmCheckin.how_remember_graph)
 plan_.insert(AmCheckin.how_motivated_graph)
 for _ in range(3):
     plan_.insert(AmCheckin.Messages.big_5_question)
-plan_.insert(AmCheckin.Messages.closing)
 
 ie = InteractionEngine(TerminalClientAndServerInterface(state_db), plan_, possible_plans)
 ie.run()
