@@ -1,10 +1,5 @@
 #!/usr/bin/env python3.6
 
-import rospy
-
-from interaction_engine.messager.message import Message
-from pickled_database import PickledDatabase
-
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.abm_interaction import AbmInteraction
 
@@ -47,8 +42,8 @@ class AbmCordialClient(Interface):
             ask_request.display.content = message.content
             ask_request.display.buttons = message.options
 
-            resp = self._client(ask_request)
-            return resp.result
+            response = self._client(ask_request)
+            return response.data
 
         except rospy.ServiceException as e:
             print("Service call failed: {}".format(e))
