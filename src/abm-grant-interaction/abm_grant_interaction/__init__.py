@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.6
 
 # Put underscore to avoid showing as public imports
+import rospy as _rospy
 import os as _os
 from abm_grant_interaction.data_structures import StateDb as _StateDb
 from abm_grant_interaction.data_structures import ParameterDb as _ParameterDb
@@ -9,37 +10,29 @@ from interaction_engine.text_populator import DatabasePopulator as _DatabasePopu
 from interaction_engine.text_populator import VarietyPopulator as _VarietyPopulator
 
 
-# Should be in 'resources' directory
+_resources_directory = _rospy.get_param(
+    'abm/path/resources',
+    default="/root/ws/catkin_ws/src/abm_interaction/resources",
+)
 _main_variation_file = 'variation.csv'
 _big_5_variation_file = 'big_5_questions.csv'
 
 
-# Created in 'temp' directory
+_state_directory = _rospy.get_param(
+    'abm/path/state',
+    default="/root/state",
+)
 _state_db_file = 'state_db.pkl'
 _param_db_file = 'param_db.pkl'
 
 
-# In top directory
-_config_file = 'config.yaml'
-
-
-# Get path relative to this file
-_abm_project_path = _os.environ["ABM_PROJECT_PATH"]
-_resources_directory = _os.path.join(_abm_project_path, 'resources')
-
-import sys
-print(_resources_directory, file=sys.stderr)
-assert _os.path.exists(_resources_directory)
-
-
 # Create state and param databases
-_temp_directory = _os.path.join(_abm_project_path, 'temp')
-_os.makedirs(_temp_directory, exist_ok=True)
+_os.makedirs(_state_directory, exist_ok=True)
 
-_state_db_path = _os.path.join(_temp_directory, _state_db_file)
+_state_db_path = _os.path.join(_state_directory, _state_db_file)
 state_db = _StateDb(_state_db_path)
 
-_param_db_path = _os.path.join(_temp_directory, _param_db_file)
+_param_db_path = _os.path.join(_state_directory, _param_db_file)
 param_db = _ParameterDb(_param_db_path)
 
 # Create a 'TextPopulator'

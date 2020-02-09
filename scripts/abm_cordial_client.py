@@ -1,9 +1,6 @@
 #!/usr/bin/env python3.6
 
-import os
-os.environ["ABM_PROJECT_PATH"] = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-
-from abm_grant_interaction import state_db, param_db
+from abm_grant_interaction import state_db
 from abm_grant_interaction.abm_interaction import AbmInteraction
 
 import rospy
@@ -44,6 +41,7 @@ class AbmCordialClient(Interface):
             ask_request.display.type = message.message_type
             ask_request.display.content = message.content
             ask_request.display.buttons = message.options
+            ask_request.display.args = message.args
 
             response = self._client(ask_request)
             return response.data
@@ -58,7 +56,13 @@ if __name__ == '__main__':
         service_topic='cordial/say_and_ask_on_gui',
         pickled_database=state_db,
     )
-    abm_interaction = AbmInteraction(interface=interface)
+    abm_interaction = AbmInteraction(
+        credentials_file_path=rospy.get_param(
+            'abm/path/fitbit_credentials',
+            default='/root/state/fitbit_credentials.yaml'
+        ),
+        interface=interface,
+    )
 
     while not rospy.is_shutdown():
         abm_interaction.run_scheduler_once()
