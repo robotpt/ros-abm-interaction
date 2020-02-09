@@ -3,6 +3,8 @@ from abm_grant_interaction import state_db, param_db, text_populator
 
 from abm_grant_interaction.interactions.options import Options
 
+import datetime
+
 
 class FirstMeeting:
 
@@ -73,7 +75,7 @@ class FirstMeeting:
                 name='ask name',
                 message=Options.Messages.set_name,
                 options='Okay',
-                transitions='introduce self'
+                transitions='introduce self',
             ),
             Node(
                 name='introduce self',
@@ -124,14 +126,14 @@ class FirstMeeting:
                 name='confirm pm checkin',
                 message=Options.Messages.confirm_pm_checkin,
                 options=['{affirmative_button_response}', '{oops_button_response}'],
-                transitions=['set day off', 'set pm checkin'],
+                transitions=['set steps goal', 'set pm checkin'],
             ),
+            # THIS NODE IS SKIPPED
             Node(
                 name='set day off',
                 message=Options.Messages.set_day_off,
                 transitions='set steps goal',
             ),
-            # THIS NODE IS SKIPPED
             Node(
                 name='confirm day off',
                 message=Options.Messages.confirm_day_off,
@@ -145,7 +147,7 @@ class FirstMeeting:
                     lambda:
                     "The last thing to do is to set your steps goal for today. " +
                     "You did {'db': '%s'} steps last week. " % state_db.Keys.STEPS_LAST_WEEK +
-                    "To work towards your goal of %s steps in %s weeks, " % (
+                    "To work towards the goal of %s steps in %s weeks, " % (
                         param_db.get(param_db.Keys.FINAL_STEPS_GOAL),
                         param_db.get(param_db.Keys.WEEKS_WITH_ROBOT)
                     ) +
@@ -153,14 +155,40 @@ class FirstMeeting:
                     "How many steps would you like to do today?"
                 ),
                 options='steps',
-                message_type=Message.Type.DIRECT_INPUT,
+                message_type=Message.Type.SLIDER,
+                args=[
+                    lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+                    "2000",
+                    '100',
+                    lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+                ],
                 result_convert_from_str_fn=int,
                 result_db_key=state_db.Keys.STEPS_GOAL,
                 tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
                 error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
                 text_populator=text_populator,
-                transitions='ask help',
-    ),
+                transitions='set when walk',
+            ),
+            Node(
+                name='set when walk',
+                message=Message(
+                    content="{when_question}",
+                    options='is when',
+                    message_type=Message.Type.TIME_ENTRY,
+                    args=[
+                        '15',
+                        lambda: (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%H:%M"),
+                    ],
+                    result_db_key=state_db.Keys.WALK_TIME,
+                    result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%I:%M %p').time(),
+                    tests=lambda x: (
+                            state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME)
+                    ),
+                    error_message="Please pick a time after now and before our evening checkin",
+                    text_populator=text_populator,
+                ),
+                transitions=['ask help'],
+            ),
             Node(
                 name='ask help',
                 message=Messages.ask_for_help,

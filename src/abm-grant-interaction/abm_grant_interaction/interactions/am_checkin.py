@@ -29,7 +29,11 @@ class AmCheckin:
         when_question = Message(
             content="{when_question}",
             options='is when',
-            message_type=Message.Type.DIRECT_INPUT,
+            message_type=Message.Type.TIME_ENTRY,
+            args=[
+                '15',
+                lambda: "{'db': '%s'}" % state_db.Keys.WALK_TIME,
+            ],
             result_db_key=state_db.Keys.WALK_TIME,
             result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
             tests=lambda x: (
@@ -44,7 +48,13 @@ class AmCheckin:
                 "How many steps would you like to do today?"
             ),
             options='steps',
-            message_type=Message.Type.DIRECT_INPUT,
+            args=[
+                lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+                "2000",
+                '100',
+                lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+            ],
+            message_type=Message.Type.SLIDER,
             result_convert_from_str_fn=int,
             result_db_key=state_db.Keys.STEPS_GOAL,
             tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),

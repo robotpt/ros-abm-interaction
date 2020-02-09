@@ -9,6 +9,7 @@ class Options:
         set_name = Message(
             content="What's your name?",
             options='Okay',
+            args=['Your name'],
             message_type=Message.Type.DIRECT_INPUT,
             result_db_key=state_db.Keys.USER_NAME,
             result_convert_from_str_fn=str,
@@ -25,9 +26,10 @@ class Options:
         set_am_checkin = Message(
             content="When would you like to checkin in the morning?",
             options='is when',
-            message_type=Message.Type.DIRECT_INPUT,
+            message_type=Message.Type.TIME_ENTRY,
+            args=['15', '8:30'],
             result_db_key=state_db.Keys.AM_CHECKIN_TIME,
-            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%I:%M %p').time(),
             tests=lambda x: x.hour < 12,
             error_message="Please pick a time in the morning",
             is_confirm=False,
@@ -42,9 +44,10 @@ class Options:
         set_pm_checkin = Message(
             content="When should we checkin in the evening?",
             options='is when',
-            message_type=Message.Type.DIRECT_INPUT,
+            message_type=Message.Type.TIME_ENTRY,
+            args=['15', '16:00'],
             result_db_key=state_db.Keys.PM_CHECKIN_TIME,
-            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%I:%M %p').time(),
             tests=lambda x: x.hour >= 12,
             error_message="Please pick a time after noon",
             is_confirm=False,
