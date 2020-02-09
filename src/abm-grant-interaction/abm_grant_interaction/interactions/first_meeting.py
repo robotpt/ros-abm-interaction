@@ -24,7 +24,7 @@ class FirstMeeting:
             content=(
                     "To help you walk regularly, we'll talk at least twice a day: " +
                     "once in the morning and once in the evening. " +
-                    "In the morning, we'll set a walking goal for the day and I'll ask you some questions." +
+                    "In the morning, we'll set a walking goal for the day and I'll ask you some questions. " +
                     "These questions will be about your plans to walk or about you. " +
                     "In the evening, we'll review the day. If you don't meet your walking goal, I may ask you why. "
             ),
