@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.6
+
 # Put underscore to avoid showing as public imports
 import os as _os
-import yaml as _yaml
 from abm_grant_interaction.data_structures import StateDb as _StateDb
 from abm_grant_interaction.data_structures import ParameterDb as _ParameterDb
 from interaction_engine.text_populator import TextPopulator as _TextPopulator
@@ -24,23 +24,16 @@ _config_file = 'config.yaml'
 
 
 # Get path relative to this file
-_src_directory_path = _os.path.dirname(_os.path.realpath(__file__))
-_relative_path_to_resources_directory = _os.path.join('..', 'resources')
-_resources_directory = _os.path.join(_src_directory_path, _relative_path_to_resources_directory)
+_abm_project_path = _os.environ["ABM_PROJECT_PATH"]
+_resources_directory = _os.path.join(_abm_project_path, 'resources')
+
+import sys
+print(_resources_directory, file=sys.stderr)
 assert _os.path.exists(_resources_directory)
 
 
-# Get path to config file
-_path_to_top_directory = _os.path.join(_src_directory_path, '..')
-_config_file_path = _os.path.join(_path_to_top_directory, _config_file)
-
-# Setup variables from config
-with open(_config_file_path, 'r') as f:
-    _data = _yaml.load(f, Loader=_yaml.FullLoader)
-
 # Create state and param databases
-_relative_path_to_temp_directory = _os.path.join('..', 'temp')
-_temp_directory = _os.path.join(_src_directory_path, _relative_path_to_temp_directory)
+_temp_directory = _os.path.join(_abm_project_path, 'temp')
 _os.makedirs(_temp_directory, exist_ok=True)
 
 _state_db_path = _os.path.join(_temp_directory, _state_db_file)

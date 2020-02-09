@@ -1,5 +1,8 @@
 #!/usr/bin/env python3.6
 
+import os
+os.environ["ABM_PROJECT_PATH"] = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.abm_interaction import AbmInteraction
 
