@@ -11,7 +11,7 @@ from interaction_engine.text_populator import VarietyPopulator as _VarietyPopula
 
 
 _resources_directory = _rospy.get_param(
-    'abm/path/resources',
+    'abm/resources/path',
     default="/root/ws/catkin_ws/src/abm_interaction/resources",
 )
 _main_variation_file = 'variation.csv'
@@ -19,7 +19,7 @@ _big_5_variation_file = 'big_5_questions.csv'
 
 
 _state_directory = _rospy.get_param(
-    'abm/path/state',
+    'abm/state/path',
     default="/root/state",
 )
 _state_db_file = 'state_db.pkl'

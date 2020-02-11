@@ -67,7 +67,7 @@ if __name__ == '__main__':
     )
     abm_interaction = AbmInteraction(
         credentials_file_path=rospy.get_param(
-            'abm/path/fitbit_credentials',
+            'abm/fitbit/credentials/path',
             default='/root/state/fitbit_credentials.yaml'
         ),
         interface=interface,
