@@ -6,4 +6,4 @@ abm:
         state:
                 path: "/root/state"
         resources:
-                path: "/root/ws/catkin_ws/src/abm_interaction/resources"
+                path: "/root/ws/catkin_ws/src/ros-abm-interaction/resources"
