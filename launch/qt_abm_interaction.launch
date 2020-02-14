@@ -1,0 +1,17 @@
+<launch>
+
+    <arg name="face_port" default="8081"/>
+    <arg name="gui_port" default="8082"/>
+    <arg name="is_launch_sound_listener" default="false" />
+
+    <!-- Launch ABM interaction + Cordial -->
+    <include file="$(find abm_interaction)/launch/abm_interaction.launch">
+        <arg name="face_port" value="$(arg face_port)"/>
+        <arg name="gui_port" value="$(arg gui_port)"/>
+        <arg name="is_launch_sound_listener" default="$(arg is_launch_sound_listener)" />
+    </include>
+
+    <!-- Launch QT NUC -->
+    <include file="$(find qt_robot_nuc)/launch/qt_robot_nuc.launch"/>
+
+</launch>
