@@ -1,5 +1,17 @@
 <launch>
 
+    <arg name="face_port" default="8080"/>
+    <arg name="gui_port" default="8081"/>
+    <arg name="is_launch_sound_listener" default="true" />
+
+    <!-- Launch Cordial -->
+    <include file="$(find cordial_manager)/launch/manager.launch">
+        <arg name="face_port" value="$(arg face_port)"/>
+        <arg name="gui_port" value="$(arg gui_port)"/>
+        <arg name="is_launch_sound_listener" default="$(arg is_launch_sound_listener)" />
+    </include>
+
+    <!-- Setup ABM interaction -->
     <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
     <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" output="screen"/>
 
