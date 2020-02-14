@@ -28,3 +28,5 @@ os.system("aws configure")
 out = subprocess.check_output(["aws", "sts", "get-caller-identity"])
 out = json.loads(out)
 print(out, type(out))
+
+print("\n\tDONE! Hit Ctrl-C to exit")
