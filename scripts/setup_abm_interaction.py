@@ -29,4 +29,8 @@ out = subprocess.check_output(["aws", "sts", "get-caller-identity"])
 out = json.loads(out)
 print(out, type(out))
 
-print("\n\tDONE! Hit Ctrl-C to exit")
+print("Make sure to grab the IP addresses below")
+tablet_port = 8082
+os.system("http-server -p {}".format(tablet_port))
+
+print("\n\tDONE! Hit Ctrl-C to exit\n")

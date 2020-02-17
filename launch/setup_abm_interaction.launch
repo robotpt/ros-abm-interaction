@@ -1,0 +1,6 @@
+<launch>
+
+    <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
+    <node pkg="abm_interaction" type="setup_abm_interaction.py" name="setup_abm_interaction" output="screen"/>
+
+</launch>

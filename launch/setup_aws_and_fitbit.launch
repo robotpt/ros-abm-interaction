@@ -1,6 +1,0 @@
-<launch>
-
-    <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
-    <node pkg="abm_interaction" type="setup_aws_and_fitbit.py" name="setup_aws_and_fitbit" output="screen"/>
-
-</launch>
