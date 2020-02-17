@@ -70,9 +70,9 @@ class AbmInteraction:
         self._checkin_scheduler = schedule.Scheduler()
         self._update_scheduler = schedule.Scheduler()
 
-        mins_to_update = param_db.get(param_db.Keys.FITBIT_PULL_RATE_MINS)
         self._update_scheduler.every().day.at("02:00").do(self._new_day_update)
-        self._update_scheduler.every(mins_to_update).minutes.do(self._update_todays_steps)
+        # mins_to_update = param_db.get(param_db.Keys.FITBIT_PULL_RATE_MINS)
+        # self._update_scheduler.every(mins_to_update).minutes.do(self._update_todays_steps)
 
         self._is_prompt_to_run = False
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
@@ -85,6 +85,7 @@ class AbmInteraction:
         self._update_scheduler.run_pending()
 
         if not state_db.is_set(state_db.Keys.FIRST_MEETING) or self._is_prompt_to_run:
+            self._update_todays_steps()
             self._build_and_run_plan()
             self._is_prompt_to_run = False
         else:
@@ -101,6 +102,7 @@ class AbmInteraction:
 
     def _run_scheduled_if_still_open(self):
         if self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
+            self._update_todays_steps()
             self._build_and_run_plan()
 
     def _build_and_run_plan(self):
