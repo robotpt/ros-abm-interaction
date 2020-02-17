@@ -45,7 +45,7 @@ class PlanBuilder:
         current_hour = datetime.datetime.now().hour
         if current_hour < 12:
             planner.insert(Common.Messages.greeting_morning)
-        elif current_hour < 18:
+        elif current_hour < 17:
             planner.insert(Common.Messages.greeting_afternoon)
         else:
             planner.insert(Common.Messages.greeting_evening)
@@ -55,7 +55,7 @@ class PlanBuilder:
         current_hour = datetime.datetime.now().hour
         if current_hour < 12:
             planner.insert(Common.Messages.closing_morning)
-        elif current_hour < 19:
+        elif current_hour < 18:
             planner.insert(Common.Messages.closing_afternoon)
         else:
             planner.insert(Common.Messages.closing_night)
@@ -165,13 +165,14 @@ class PlanBuilder:
         if planner is None:
             planner = MessagerPlanner(possible_plans)
 
-        if not self._is_synced_recently():
-            planner.insert(PmCheckin.Messages.no_sync)
-        elif self._is_time_for_status_update():
-            if state_db.get(state_db.Keys.STEPS_TODAY) >= state_db.get(state_db.Keys.STEPS_GOAL):
-                planner.insert(OffCheckin.Messages.give_status_met_goal)
+        if self._is_time_for_status_update():
+            if self._is_synced_recently():
+                if state_db.get(state_db.Keys.STEPS_TODAY) >= state_db.get(state_db.Keys.STEPS_GOAL):
+                    planner.insert(OffCheckin.Messages.give_status_met_goal)
+                else:
+                    planner.insert(OffCheckin.Messages.give_status)
             else:
-                planner.insert(OffCheckin.Messages.give_status)
+                planner.insert(PmCheckin.Messages.no_sync)
 
         planner.insert(
             Options.options,
