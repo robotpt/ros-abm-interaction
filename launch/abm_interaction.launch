@@ -13,6 +13,6 @@
 
     <!-- Setup ABM interaction -->
     <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
-    <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" output="screen"/>
+    <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" respawn="true" output="screen"/>
 
 </launch>

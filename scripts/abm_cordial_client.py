@@ -6,7 +6,9 @@ from abm_grant_interaction.abm_interaction import AbmInteraction
 import rospy
 from cordial_gui.srv import Ask, AskRequest
 from std_msgs.msg import Empty
+import requests
 
+from fitbit_client import FitbitTooManyCallsError
 from interaction_engine.interfaces.interface import Interface
 from interaction_engine.messager.message import Message
 
@@ -65,20 +67,26 @@ if __name__ == '__main__':
         ),
         pickled_database=state_db,
     )
-    abm_interaction = AbmInteraction(
-        credentials_file_path=rospy.get_param(
-            'abm/fitbit/credentials/path',
-            default='/root/state/fitbit_credentials.yaml'
-        ),
-        interface=interface,
-    )
+    try:
+        abm_interaction = AbmInteraction(
+            credentials_file_path=rospy.get_param(
+                'abm/fitbit/credentials/path',
+                default='/root/state/fitbit_credentials.yaml'
+            ),
+            interface=interface,
+        )
 
-    _USER_PROMPTED_TOPIC = "cordial/gui/prompt"
-    rospy.Subscriber(_USER_PROMPTED_TOPIC, Empty, lambda _: abm_interaction.set_prompt_to_handle())
+        _USER_PROMPTED_TOPIC = "cordial/gui/prompt"
+        rospy.Subscriber(_USER_PROMPTED_TOPIC, Empty, lambda _: abm_interaction.set_prompt_to_handle())
 
-    while not rospy.is_shutdown():
-        rospy.loginfo("ABM interaction running")
-        abm_interaction.run_scheduler_once()
-        rospy.sleep(1.)
+        while not rospy.is_shutdown():
+            rospy.loginfo("ABM interaction running")
+            abm_interaction.run_scheduler_once()
+            rospy.sleep(1.)
+
+    except requests.exceptions.ConnectionError:
+        rospy.logerr("Unable to connect to Fitbit")
+    except FitbitTooManyCallsError:
+        rospy.logerr("Too many calls to fitbit's API, wait an hour")
 
 
