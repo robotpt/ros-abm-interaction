@@ -37,6 +37,8 @@ class StateDb(PickledDatabase):
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
         STEPS_GOAL = 'steps_goal'
         SUGGESTED_STEPS_TODAY = 'suggested_steps_today'
+        MIN_SUGGESTED_STEPS_TODAY = 'min_suggested_steps_today'
+        MAX_SUGGESTED_STEPS_TODAY = 'max_suggested_steps_today'
         STEPS_TODAY = 'steps_today'
         STEPS_THIS_WEEK = 'steps_this_week'
         STEPS_LAST_WEEK = 'steps_last_week'
@@ -156,6 +158,14 @@ class StateDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             StateDb.Keys.SUGGESTED_STEPS_TODAY,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.MIN_SUGGESTED_STEPS_TODAY,
+            tests=lambda x: math_tools.is_int(x),
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.MAX_SUGGESTED_STEPS_TODAY,
             tests=lambda x: math_tools.is_int(x),
         )
         self.create_key_if_not_exists(

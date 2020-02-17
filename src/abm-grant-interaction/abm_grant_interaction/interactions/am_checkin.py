@@ -49,17 +49,17 @@ class AmCheckin:
             ),
             options='steps',
             args=[
-                lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
-                "2000",
-                '100',
+                lambda: "{'db': '%s'}" % state_db.Keys.MIN_SUGGESTED_STEPS_TODAY,
+                lambda: "{'db': '%s'}" % state_db.Keys.MAX_SUGGESTED_STEPS_TODAY,
+                '1',
                 lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
             ],
             message_type=Message.Type.SLIDER,
             result_convert_from_str_fn=int,
             result_db_key=state_db.Keys.STEPS_GOAL,
-            tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
+            tests=lambda x: x >= state_db.get(state_db.Keys.MIN_SUGGESTED_STEPS_TODAY),
             error_message=(
-                "Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+                "Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.MIN_SUGGESTED_STEPS_TODAY,
             ),
             text_populator=text_populator,
         )

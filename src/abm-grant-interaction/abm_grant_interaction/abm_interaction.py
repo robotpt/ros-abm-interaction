@@ -160,7 +160,9 @@ class AbmInteraction:
         steps_this_week = self._goal_setter.get_steps_this_week(date)
         logging.info('Updated  steps this weeky')
 
-        state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, day_goal)
+        state_db.set(state_db.Keys.MIN_SUGGESTED_STEPS_TODAY, round(day_goal))
+        state_db.set(state_db.Keys.SUGGESTED_STEPS_TODAY, round(1.3*day_goal))
+        state_db.set(state_db.Keys.MAX_SUGGESTED_STEPS_TODAY, round(2*day_goal))
         state_db.set(state_db.Keys.STEPS_LAST_WEEK, steps_last_week)
         state_db.set(state_db.Keys.STEPS_THIS_WEEK, steps_this_week)
 

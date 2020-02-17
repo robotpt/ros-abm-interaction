@@ -60,12 +60,6 @@ class FirstMeeting:
             message_type=Message.Type.MULTIPLE_CHOICE,
             text_populator=text_populator,
         )
-        ask_for_help = Message(
-            content="We're setup! Is anything unclear?  Maybe I get get my *nod*human can give us a helping hand.",
-            message_type=Message.Type.MULTIPLE_CHOICE,
-            options='All set',
-            text_populator=text_populator,
-        )
 
     first_meeting = DirectedGraph(
         name='first meeting',
@@ -157,15 +151,15 @@ class FirstMeeting:
                 options='steps',
                 message_type=Message.Type.SLIDER,
                 args=[
-                    lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
-                    "2000",
-                    '100',
+                    lambda: "{'db': '%s'}" % state_db.Keys.MIN_SUGGESTED_STEPS_TODAY,
+                    lambda: "{'db': '%s'}" % state_db.Keys.MAX_SUGGESTED_STEPS_TODAY,
+                    '1',
                     lambda: "{'db': '%s'}" % state_db.Keys.SUGGESTED_STEPS_TODAY,
                 ],
                 result_convert_from_str_fn=int,
                 result_db_key=state_db.Keys.STEPS_GOAL,
-                tests=lambda x: x >= state_db.get(state_db.Keys.SUGGESTED_STEPS_TODAY),
-                error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.SUGGESTED_STEPS_TODAY,
+                tests=lambda x: x >= state_db.get(state_db.Keys.MIN_SUGGESTED_STEPS_TODAY),
+                error_message="Please select a goal that is at least {'db': '%s'} steps" % state_db.Keys.MIN_SUGGESTED_STEPS_TODAY,
                 text_populator=text_populator,
                 transitions='set when walk',
             ),
@@ -187,18 +181,13 @@ class FirstMeeting:
                     error_message="Please pick a time after now and before our evening checkin",
                     text_populator=text_populator,
                 ),
-                transitions=['ask help'],
-            ),
-            Node(
-                name='ask help',
-                message=Messages.ask_for_help,
-                transitions='first closing',
+                transitions=['first closing'],
             ),
             Node(
                 name='first closing',
                 content=(
-                    "Whew! *shake_head*That's all. "
-                    # + "For any other questions, the humans should know better than me."
+                    "Alright, we're all setup! " +
+                    "I'll see you for checkin this evening!"
                 ),
                 message_type=Message.Type.MULTIPLE_CHOICE,
                 options=['Bye', 'Talk to you later'],
