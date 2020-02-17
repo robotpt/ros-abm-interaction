@@ -54,10 +54,10 @@ goodbye_morning,{goodbye}
 goodbye_morning,"Enjoy your day{_name_or_not}"
 goodbye_morning,"Here’s to a good day{_name_or_not}"
 goodbye_morning,"You have a good day{_name_or_not}"
-goodbye_afternoon,{goodbye}{_name_or_not}
+goodbye_afternoon,{goodbye}
 goodbye_afternoon,Good afternoon{_name_or_not}
 goodbye_afternoon,Good day{_name_or_not}
-goodbye_night,{goodbye}{_name_or_not}
+goodbye_night,{goodbye}
 goodbye_night,"Good night{_name_or_not}"
 goodbye_night,"You have a good night{_name_or_not}"
 
