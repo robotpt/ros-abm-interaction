@@ -139,7 +139,7 @@ class FirstMeeting:
                 name='set steps goal',
                 content=(
                     lambda:
-                    "The last thing to do is to set your steps goal for today. " +
+                    "The last thing to do is to set walking goals for today. " +
                     "You did {'db': '%s'} steps last week. " % state_db.Keys.STEPS_LAST_WEEK +
                     "To work towards the goal of %s steps in %s weeks, " % (
                         param_db.get(param_db.Keys.FINAL_STEPS_GOAL),

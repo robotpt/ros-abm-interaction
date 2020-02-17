@@ -5,6 +5,19 @@ from abm_grant_interaction import state_db, param_db, text_populator
 class OffCheckin:
 
     class Messages:
+
+        no_sync = Message(
+            content=(
+                    "I haven't heard from your Fitbit in a while. " +
+                    "Try syncing your phone, and then check back with me again."
+            ),
+            options=[
+                "{affirmative_plus_button_response}",
+                "{Ill_try_that_button_response}",
+            ],
+            message_type=Message.Type.MULTIPLE_CHOICE,
+            text_populator=text_populator,
+        )
         give_status = Message(
             content=(
                     "You've done {'db': '%s'} steps so far today. " % state_db.Keys.STEPS_TODAY +

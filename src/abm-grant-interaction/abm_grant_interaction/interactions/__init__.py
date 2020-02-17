@@ -34,6 +34,7 @@ first_meeting_plans = [
     FirstMeeting.first_meeting,
 ]
 off_checkin_plans = [
+    OffCheckin.Messages.no_sync,
     OffCheckin.Messages.give_status,
     OffCheckin.Messages.give_status_met_goal,
 ]

@@ -172,7 +172,7 @@ class PlanBuilder:
                 else:
                     planner.insert(OffCheckin.Messages.give_status)
             else:
-                planner.insert(PmCheckin.Messages.no_sync)
+                planner.insert(OffCheckin.Messages.no_sync)
 
         planner.insert(
             Options.options,
