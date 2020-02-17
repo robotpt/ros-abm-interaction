@@ -7,7 +7,7 @@ class PmCheckin:
     class Messages:
         no_sync = Message(
             content=(
-                "I haven't heard from your Fitbit in a while. " +
+                "It's time for our evening checkin, but I haven't heard from your Fitbit in a while. " +
                 "Try syncing your phone, and then check back with me again."
             ),
             options=[
