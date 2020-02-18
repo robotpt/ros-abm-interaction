@@ -35,7 +35,7 @@ class AmCheckin:
                 lambda: "{'db': '%s'}" % state_db.Keys.WALK_TIME,
             ],
             result_db_key=state_db.Keys.WALK_TIME,
-            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%H:%M').time(),
+            result_convert_from_str_fn=lambda x: datetime.datetime.strptime(x, '%I:%M %p').time(),
             tests=lambda x: (
                 state_db.get(state_db.Keys.AM_CHECKIN_TIME) <= x <= state_db.get(state_db.Keys.PM_CHECKIN_TIME)
             ),
