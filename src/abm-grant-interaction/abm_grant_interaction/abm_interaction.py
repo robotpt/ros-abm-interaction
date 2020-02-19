@@ -68,11 +68,9 @@ class AbmInteraction:
         self._update_todays_steps()
 
         self._checkin_scheduler = schedule.Scheduler()
-        self._update_scheduler = schedule.Scheduler()
 
-        self._update_scheduler.every().day.at("02:00").do(self._new_day_update)
-        # mins_to_update = param_db.get(param_db.Keys.FITBIT_PULL_RATE_MINS)
-        # self._update_scheduler.every(mins_to_update).minutes.do(self._update_todays_steps)
+        self._update_scheduler = schedule.Scheduler()
+        self._update_scheduler.every(15).seconds.do(self._new_day_update)
 
         self._is_prompt_to_run = False
         if state_db.is_set(state_db.Keys.FIRST_MEETING):
@@ -99,6 +97,7 @@ class AbmInteraction:
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
         state_db.set(state_db.Keys.IS_REDO_SCHEDULE, False)
+        state_db.set(state_db.Keys.LAST_DAY_UPDATE_DATE, datetime.datetime.now().date())
 
     def _run_scheduled_if_still_open(self):
         if self._plan_builder.is_am_checkin() or self._plan_builder.is_pm_checkin():
@@ -144,14 +143,23 @@ class AbmInteraction:
         logging.info('Updated last sync time')
 
     def _new_day_update(self):
-        self._update_week_steps_and_goals()
-        if not state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY):
-            state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, True)
-        else:
-            state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
-        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
-        state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+        last_day_update = state_db.get(state_db.Keys.LAST_DAY_UPDATE_DATE)
+        current_date = datetime.datetime.now().date()
+        days_since_last_day_update = (current_date-last_day_update).days
+
+        if days_since_last_day_update > 0:
+
+            self._update_week_steps_and_goals()
+            if not state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY):
+                state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, True)
+            else:
+                state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
+
+            state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
+            state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
+
+            state_db.set(state_db.Keys.LAST_DAY_UPDATE_DATE, datetime.datetime.now().date())
 
     def _update_week_steps_and_goals(self):
         date = datetime.datetime.now()
@@ -177,9 +185,9 @@ def make_date_time(hour, minute, days=None):
     return dt
 
 
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
-    IS_RESET_STATE_DB = True
+    IS_RESET_STATE_DB = False
     interaction = AbmInteraction(is_reset_state_db=IS_RESET_STATE_DB)
     mins_before_allowed = param_db.get(param_db.Keys.MINS_BEFORE_ALLOW_CHECKIN)
     mins_after_allowed = param_db.get(param_db.Keys.MINS_AFTER_ALLOW_CHECKIN)

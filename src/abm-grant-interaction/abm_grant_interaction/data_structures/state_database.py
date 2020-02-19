@@ -35,6 +35,8 @@ class StateDb(PickledDatabase):
         IS_MET_GOAL = 'is_met_goal'
 
         LAST_FITBIT_SYNC = 'last_fitbit_sync'
+        LAST_AM_CHECKIN_DATE = 'last_am_checkin_date'
+        LAST_DAY_UPDATE_DATE = 'last_day_update_date'
         STEPS_GOAL = 'steps_goal'
         SUGGESTED_STEPS_TODAY = 'suggested_steps_today'
         MIN_SUGGESTED_STEPS_TODAY = 'min_suggested_steps_today'
@@ -183,6 +185,14 @@ class StateDb(PickledDatabase):
         self.create_key_if_not_exists(
             StateDb.Keys.LAST_FITBIT_SYNC,
             tests=lambda x: type(x) is datetime.datetime
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.LAST_AM_CHECKIN_DATE,
+            tests=lambda x: type(x) is datetime.date
+        )
+        self.create_key_if_not_exists(
+            StateDb.Keys.LAST_DAY_UPDATE_DATE,
+            tests=lambda x: type(x) is datetime.date
         )
         self.create_key_if_not_exists(
             StateDb.Keys.DAY_OFF,

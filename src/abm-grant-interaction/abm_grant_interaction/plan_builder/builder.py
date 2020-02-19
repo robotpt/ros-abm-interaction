@@ -64,9 +64,9 @@ class PlanBuilder:
 
     def _set_vars_after_first_meeting(self):
         state_db.set(state_db.Keys.FIRST_MEETING, datetime.datetime.now())
-        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
         state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
         state_db.set(state_db.Keys.IS_REDO_SCHEDULE, True)
+        self._am_checkin_closing_hook()
 
     def _build_am_checkin(self, planner=None):
 
@@ -78,12 +78,13 @@ class PlanBuilder:
         planner.insert(AmCheckin.Messages.set_goal)
         planner.insert(self._build_am_questions())
         planner.update_last_inserts_hooks(
-            post_hook=lambda: state_db.set(
-                state_db.Keys.IS_DONE_AM_CHECKIN_TODAY,
-                True
-            )
+            post_hook=self._am_checkin_closing_hook
         )
         return planner
+
+    def _am_checkin_closing_hook(self):
+        state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, True)
+        state_db.set(state_db.Keys.LAST_AM_CHECKIN_DATE, datetime.datetime.now().date())
 
     def _build_am_questions(self):
         num_ii_qs = self._get_num_ii_questions(
