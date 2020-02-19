@@ -48,6 +48,9 @@ class AbmCordialClient(Interface):
             ask_request.display.buttons = message.options
             ask_request.display.args = message.args
 
+            rospy.loginfo("Message created")
+            rospy.loginfo(ask_request.display)
+
             response = self._client(ask_request)
             if response.data == self._timeout_message:
                 raise TimeoutError
