@@ -13,7 +13,7 @@ greeting_,Hiya
 greeting_,It's a pleasure to see you
 greeting_,It's great to see you
 greeting_,It's wonderful to see you
-greeting_,It’s fantastic to see you
+greeting_,It's fantastic to see you
 greeting_,Nice to see you
 greeting_,There you are
 greeting_,Well hello
@@ -33,12 +33,11 @@ greeting_evening,{greeting}
 greeting_sweet,You're a ray of sunshine.
 greeting_sweet,Hey sweet pea.
 greeting_sweet,It's delightful to see you.
-greeting_sweet,It’s lovely to see you.
+greeting_sweet,It's lovely to see you.
 greeting_sweet,Seeing you feels like a hug.
 greeting_sweet,Seeing you makes me smile on the inside.
 greeting_sweet,Seeing you makes my circuits skip a beat.
 greeting_sweet,What a joy to see you.
-greeting_afternoon_sweet,You put the good in my afternoon.
 
 goodbye_,"Bye bye"
 goodbye_,"Bye"
@@ -52,7 +51,7 @@ goodbye,"{goodbye_}{_name_or_not}"
 
 goodbye_morning,{goodbye}
 goodbye_morning,"Enjoy your day{_name_or_not}"
-goodbye_morning,"Here’s to a good day{_name_or_not}"
+goodbye_morning,"Here's to a good day{_name_or_not}"
 goodbye_morning,"You have a good day{_name_or_not}"
 goodbye_afternoon,{goodbye}
 goodbye_afternoon,Good afternoon{_name_or_not}
@@ -103,24 +102,24 @@ thanks_means_a_lot,Wow! Thanks that makes my day.
 thanks,Thank you
 thanks,Thanks
 
-Ill_try_that_button_response,I’ll definitely try that
-Ill_try_that_button_response,I’ll try that
-Ill_try_that_button_response,I’ll give that a shot
+Ill_try_that_button_response,I'll definitely try that
+Ill_try_that_button_response,I'll try that
+Ill_try_that_button_response,I'll give that a shot
 maybe_Ill_try_button_response,I may try that
 maybe_Ill_try_button_response,Maybe I'll try that
 maybe_Ill_try_button_response,I may give that a shot
 maybe_Ill_try_button_response,I might give that a shot
-not_for_me_button_response,That’s not for me
-not_for_me_button_response,That’s not my thing
+not_for_me_button_response,That's not for me
+not_for_me_button_response,That's not my thing
 
 transitional_statement,All right.
 transitional_statement,Alrighty.
 transitional_statement,Gotcha.
 transitional_statement,Okay.
-oops_button_response,"No. Actually, I didn’t mean that"
-oops_button_response,"Oh, I didn’t mean that"
-oops_button_response,"Oops, I didn’t mean that"
-oops_button_response,That’s not what I meant
+oops_button_response,"No. Actually, I didn't mean that"
+oops_button_response,"Oh, I didn't mean that"
+oops_button_response,"Oops, I didn't mean that"
+oops_button_response,That's not what I meant
 
 steps_goal,steps goal
 steps_goal,walking goal
