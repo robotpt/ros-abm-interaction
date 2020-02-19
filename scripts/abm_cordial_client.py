@@ -61,18 +61,12 @@ if __name__ == '__main__':
 
     interface = AbmCordialClient(
         service_topic='cordial/say_and_ask_on_gui',
-        timeout_message=rospy.get_param(
-            'cordial/gui/timeout_msg',
-            '<timeout>',
-        ),
+        timeout_message=rospy.get_param('cordial/gui/timeout_msg'),
         pickled_database=state_db,
     )
     try:
         abm_interaction = AbmInteraction(
-            credentials_file_path=rospy.get_param(
-                'abm/fitbit/credentials/path',
-                default='/root/state/fitbit_credentials.yaml'
-            ),
+            credentials_file_path=rospy.get_param('abm/fitbit/credentials/path'),
             interface=interface,
         )
 
@@ -80,7 +74,7 @@ if __name__ == '__main__':
         rospy.Subscriber(_USER_PROMPTED_TOPIC, Empty, lambda _: abm_interaction.set_prompt_to_handle())
 
         while not rospy.is_shutdown():
-            rospy.loginfo("ABM interaction running")
+            rospy.logdebug("ABM interaction running")
             abm_interaction.run_scheduler_once()
             rospy.sleep(1.)
 
@@ -88,5 +82,3 @@ if __name__ == '__main__':
         rospy.logerr("Unable to connect to Fitbit")
     except FitbitTooManyCallsError:
         rospy.logerr("Too many calls to fitbit's API, wait an hour")
-
-
