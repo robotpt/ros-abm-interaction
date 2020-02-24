@@ -1,4 +1,8 @@
 #! /bin/python3.6
+
+import rospy
+from std_msgs.msg import Bool
+
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import possible_plans
 from abm_grant_interaction.goal_setter.setter import GoalSetter
@@ -23,6 +27,7 @@ class AbmInteraction:
             self,
             credentials_file_path="fitbit_credentials.yaml",
             redirect_url="http://localhost",
+            is_data_recording_topic='data_capture/is_record',
             interface=None,
             is_reset_state_db=False,
             goal_setter=None,
@@ -61,8 +66,9 @@ class AbmInteraction:
                 week_goal_max_improvement_ratio=2.0,
                 daily_goal_min_to_max_ratio=2.5,
             )
-
         self._goal_setter = goal_setter
+
+        self._is_recording_publisher = rospy.Publisher(is_data_recording_topic, Bool, queue_size=1)
 
         self._update_week_steps_and_goals()
         self._update_todays_steps()
@@ -108,13 +114,25 @@ class AbmInteraction:
         plan = self._plan_builder.build()
         interaction_engine = InteractionEngine(self._interface, plan, possible_plans)
         try:
+            self._publish_is_record_msg(True)
             interaction_engine.run()
         except TimeoutError:
             pass
+        finally:
+            self._publish_is_record_msg(False)
 
         if state_db.get(state_db.Keys.IS_REDO_SCHEDULE):
             self._build_checkin_schedule()
             state_db.set(state_db.Keys.IS_REDO_SCHEDULE, False)
+    
+    def _publish_is_record_msg(self, is_record: bool):
+        msg = Bool()
+        msg.data = is_record
+        if is_record is True:
+            rospy.loginfo("Published to start recording data")
+        else:
+            rospy.loginfo("Published to stop recording data")
+        self._is_recording_publisher.publish(msg)
 
     def _build_checkin_schedule(self):
 
@@ -175,14 +193,6 @@ class AbmInteraction:
         state_db.set(state_db.Keys.MAX_SUGGESTED_STEPS_TODAY, round(2*day_goal))
         state_db.set(state_db.Keys.STEPS_LAST_WEEK, steps_last_week)
         state_db.set(state_db.Keys.STEPS_THIS_WEEK, steps_this_week)
-
-
-def make_date_time(hour, minute, days=None):
-    dt = datetime.datetime.now().replace(hour=hour, minute=minute)
-    if days is not None:
-        dt += datetime.timedelta(days=days)
-
-    return dt
 
 
 if __name__ == '__main__' and False:

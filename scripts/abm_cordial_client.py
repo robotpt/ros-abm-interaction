@@ -70,6 +70,10 @@ if __name__ == '__main__':
     try:
         abm_interaction = AbmInteraction(
             credentials_file_path=rospy.get_param('abm/fitbit/credentials/path'),
+            is_data_recording_topic=rospy.get_param(
+                'data_capture/messages/topic/is_record',
+                default='data_capture/is_record',
+            ),
             interface=interface,
         )
 
