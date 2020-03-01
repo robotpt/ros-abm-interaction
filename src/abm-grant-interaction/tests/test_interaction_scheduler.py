@@ -1,13 +1,13 @@
+# Note that you must run a ROScore and initialize the abm_interaction's parameters before you can run these tests
+
 import unittest
 from unittest import mock
 
 from abm_grant_interaction.abm_interaction import AbmInteraction
 
 from abm_grant_interaction import state_db, param_db
-from abm_grant_interaction.interactions import possible_plans
-from abm_grant_interaction.goal_setter import GoalSetter
 from abm_grant_interaction.testing_utils.simulate_messages import \
-    simulate_run_plan, simulate_run_once
+    simulate_run_plan
 from freezegun import freeze_time
 
 import datetime
@@ -70,7 +70,8 @@ class TestAbmInteraction(unittest.TestCase):
         self.assertTrue(state_db.get(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY))
         self.assertFalse(state_db.get(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY))
 
-    def test_prompt_interactions(self):
+    @mock.patch('rospy.Publisher')
+    def test_prompt_interactions(self, _):
         """
         Note that the steps goals and numbers get in a weird positive feedback loop because of how I
         monkey patched the fitbit reader
@@ -130,7 +131,8 @@ class TestAbmInteraction(unittest.TestCase):
                 for _ in range(2):
                     self.abm_interaction._build_and_run_plan()
 
-    def test_scheduler_for_updates_and_running_full_interaction(self):
+    @mock.patch('rospy.Publisher')
+    def test_scheduler_for_updates_and_running_full_interaction(self, _):
         """
         Note that the steps goals and numbers get in a weird positive feedback loop because of how I
         monkey patched the fitbit reader

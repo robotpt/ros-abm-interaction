@@ -1,7 +1,7 @@
 #! /bin/python3.6
 
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float32
 
 from abm_grant_interaction import state_db, param_db
 from abm_grant_interaction.interactions import possible_plans
@@ -18,6 +18,7 @@ import logging
 
 from abm_fitbit_client import AbmFitbitClient
 
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -28,6 +29,7 @@ class AbmInteraction:
             credentials_file_path="fitbit_credentials.yaml",
             redirect_url="http://localhost",
             is_data_recording_topic='data_capture/is_record',
+            automaticity_topic='abm/automaticity',
             interface=None,
             is_reset_state_db=False,
             goal_setter=None,
@@ -69,6 +71,7 @@ class AbmInteraction:
         self._goal_setter = goal_setter
 
         self._is_recording_publisher = rospy.Publisher(is_data_recording_topic, Bool, queue_size=1)
+        self._automaticity_publisher = rospy.Publisher(automaticity_topic, Float32, queue_size=1)
 
         self._update_week_steps_and_goals()
         self._update_todays_steps()
@@ -92,6 +95,7 @@ class AbmInteraction:
             self._update_todays_steps()
             self._build_and_run_plan()
             self._is_prompt_to_run = False
+
         else:
             self._checkin_scheduler.run_pending()
 
@@ -174,10 +178,16 @@ class AbmInteraction:
             else:
                 state_db.set(state_db.Keys.IS_MISSED_PM_YESTERDAY, False)
 
+            self._publish_automaticity()
+
             state_db.set(state_db.Keys.IS_DONE_AM_CHECKIN_TODAY, False)
             state_db.set(state_db.Keys.IS_DONE_PM_CHECKIN_TODAY, False)
 
             state_db.set(state_db.Keys.LAST_DAY_UPDATE_DATE, datetime.datetime.now().date())
+
+    def _publish_automaticity(self):
+        automaticity_msg = Float32(state_db.get(state_db.Keys.BKT_pL))
+        self._automaticity_publisher.publish(automaticity_msg)
 
     def _update_week_steps_and_goals(self):
         date = datetime.datetime.now()

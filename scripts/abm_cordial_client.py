@@ -74,6 +74,10 @@ if __name__ == '__main__':
                 'data_capture/messages/topic/is_record',
                 default='data_capture/is_record',
             ),
+            automaticity_topic=rospy.get_param(
+                'data_capture/messages/topics/automaticity',
+                default='data_capture/automaticity'
+            ),
             interface=interface,
         )
 
