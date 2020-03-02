@@ -30,7 +30,7 @@
     <!-- Launch data capture services -->
     <include file="$(find aws_uploader)/launch/aws_uploader.launch">
         <arg name="upload_directory_path" default="$(arg upload_directory)"/>
-        <arg name="bucket_name" default="ros-bucket-128947294807"/>
+        <arg name="bucket_name" default="$(env AWS_BUCKET_NAME)"/>
     </include>
     <include file="$(find video_capture)/launch/capture.launch">
         <arg name="output_directory" value="$(arg upload_directory)"/>
