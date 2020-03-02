@@ -95,9 +95,6 @@ class AbmInteraction:
             self._update_todays_steps()
             self._build_and_run_plan()
             self._is_prompt_to_run = False
-
-            # TODO remove this line as it was for debugging
-            self._publish_automaticity()
         else:
             self._checkin_scheduler.run_pending()
 
@@ -188,8 +185,13 @@ class AbmInteraction:
             state_db.set(state_db.Keys.LAST_DAY_UPDATE_DATE, datetime.datetime.now().date())
 
     def _publish_automaticity(self):
-        automaticity_msg = Float32(state_db.get(state_db.Keys.BKT_pL))
-        self._automaticity_publisher.publish(automaticity_msg)
+        automaticity = state_db.get(state_db.Keys.BKT_pL)
+        rospy.loginfo("Publishing automaticity: {}".format(automaticity))
+        self._automaticity_publisher.publish(
+            Float32(
+                automaticity
+            )
+        )
 
     def _update_week_steps_and_goals(self):
         date = datetime.datetime.now()

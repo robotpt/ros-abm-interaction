@@ -9,7 +9,7 @@
 
     <arg name="mongodb_path" default="/root/mongodb_log" />
     <arg name="mongodb_port" default="62345" />
-    <arg name="topics_to_record" default="/cordial/gui/display /cordial/gui/user_response /abm/automaticity" />
+    <arg name="topics_to_record" default="cordial/gui/display cordial/gui/user_response abm/automaticity" />
 
 
     <!-- Launch Cordial -->
@@ -22,10 +22,12 @@
 
     <!-- Setup ABM interaction -->
     <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
+    <!--
     <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" 
     	respawn="true" 
 	output="screen"
 	/>
+	-->
 
 
     <!-- Launch data capture services -->
