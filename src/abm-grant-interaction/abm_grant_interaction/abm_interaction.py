@@ -96,6 +96,8 @@ class AbmInteraction:
             self._build_and_run_plan()
             self._is_prompt_to_run = False
 
+            # TODO remove this line as it was for debugging
+            self._publish_automaticity()
         else:
             self._checkin_scheduler.run_pending()
 

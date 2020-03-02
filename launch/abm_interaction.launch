@@ -1,13 +1,16 @@
 <launch>
 
+
     <arg name="face_port" default="8080"/>
     <arg name="gui_port" default="8081"/>
     <arg name="is_launch_sound_listener" default="true" />
-    <arg name="video_directory" value="/root/upload" />
+    <arg name="is_record_audio" default="true" />
+    <arg name="upload_directory" value="/root/upload" />
 
     <arg name="mongodb_path" default="/root/mongodb_log" />
     <arg name="mongodb_port" default="62345" />
     <arg name="topics_to_record" default="/cordial/gui/display /cordial/gui/user_response /abm/automaticity" />
+
 
     <!-- Launch Cordial -->
     <include file="$(find cordial_manager)/launch/manager.launch">
@@ -16,19 +19,36 @@
         <arg name="is_launch_sound_listener" default="$(arg is_launch_sound_listener)" />
     </include>
 
+
     <!-- Setup ABM interaction -->
     <rosparam file="$(find abm_interaction)/config/config.yaml" command="load"/>
-    <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" respawn="true" output="screen"/>
+    <node pkg="abm_interaction" type="abm_cordial_client.py" name="abm_cordial_client" 
+    	respawn="true" 
+	output="screen"
+	/>
+
 
     <!-- Launch data capture services -->
     <include file="$(find aws_uploader)/launch/aws_uploader.launch">
-        <arg name="upload_directory_path" default="$(arg video_directory)"/>
+        <arg name="upload_directory_path" default="$(arg upload_directory)"/>
         <arg name="bucket_name" default="ros-bucket-128947294807"/>
     </include>
     <include file="$(find video_capture)/launch/capture.launch">
-        <arg name="output_directory" value="$(arg video_directory)"/>
+        <arg name="output_directory" value="$(arg upload_directory)"/>
         <arg name="image_topic" value="camera/color/image_raw"/>
+        <arg name="is_record_topic" value="data_capture/is_record"/>
     </include>
+    <group if="$(arg is_record_audio)">
+        <include file="$(find audio_capture2)/launch/capture.launch">
+            <arg name="output_directory" value="$(arg upload_directory)"/>
+            <arg name="audio_topic" value="audio/audio"/>
+            <arg name="is_record_topic" value="data_capture/is_record"/>
+            <arg name="is_launch_audio_capture" value="true"/>
+        </include>
+    </group>
+
+
+    <!-- MongoDB log -->
     <include file="$(find mongodb_store)/launch/mongodb_store.launch">
     	<arg name="db_path" value="$(arg mongodb_path)" />
 	<arg name="port" value="$(arg mongodb_port)" />
