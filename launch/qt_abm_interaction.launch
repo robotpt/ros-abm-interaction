@@ -14,4 +14,7 @@
     <!-- Launch QT NUC -->
     <include file="$(find qt_robot_nuc)/launch/qt_robot_nuc.launch"/>
 
+    <!-- Relay gesture messages to QT robot -->
+    <node pkg="topic_tools" type="relay" name="gesture_relay" args="/cordial/gesture/play /qt_robot/gesture/play" />
+
 </launch>
