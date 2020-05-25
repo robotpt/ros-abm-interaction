@@ -69,7 +69,7 @@ class ParameterDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             ParameterDb.Keys.STEPS_PER_MINUTE_FOR_ACTIVE,
-            30,
+            60,
             tests=check_non_negative_int
         )
         self.create_key_if_not_exists(
@@ -84,7 +84,7 @@ class ParameterDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             ParameterDb.Keys.INACTIVE_INTERACTION_TIMEOUT_SECONDS,
-            45,
+            90,
             tests=check_non_negative_int
         )
         self.create_key_if_not_exists(
