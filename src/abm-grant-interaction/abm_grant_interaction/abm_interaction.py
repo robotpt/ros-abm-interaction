@@ -30,6 +30,7 @@ class AbmInteraction:
             redirect_url="http://localhost",
             is_data_recording_topic='data_capture/is_record',
             automaticity_topic='abm/automaticity',
+            is_go_to_sleep_topic='cordial/sleep',
             interface=None,
             is_reset_state_db=False,
             goal_setter=None,
@@ -72,6 +73,7 @@ class AbmInteraction:
 
         self._is_recording_publisher = rospy.Publisher(is_data_recording_topic, Bool, queue_size=1)
         self._automaticity_publisher = rospy.Publisher(automaticity_topic, Float32, queue_size=1)
+        self._is_go_to_sleep_publisher = rospy.Publisher(is_go_to_sleep_topic, Bool, queue_size=1)
 
         self._update_week_steps_and_goals()
         self._update_todays_steps()
@@ -97,6 +99,8 @@ class AbmInteraction:
             self._is_prompt_to_run = False
         else:
             self._checkin_scheduler.run_pending()
+
+        self._is_go_to_sleep_publisher.publish(Bool(data=True))
 
     def set_prompt_to_handle(self):
         self._is_prompt_to_run = True
