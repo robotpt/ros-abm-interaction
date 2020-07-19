@@ -19,16 +19,16 @@ greeting_,There you are
 greeting_,Well hello
 greeting_,Hey there
 greeting_,Ahoy hoy
-greeting,"{hi_gesture_or_not}{greeting_}{_name_or_not}"
+greeting,"{greeting_}{_name_or_not}"
 
-greeting_morning,{greeting}
-greeting_morning,Morning{_name_or_not}
-greeting_morning,Good morning{_name_or_not}
-greeting_afternoon,{greeting}
-greeting_afternoon,Good day{_name_or_not}
-greeting_afternoon,Good afternoon{_name_or_not}
-greeting_evening,Good evening{_name_or_not}
-greeting_evening,{greeting}
+greeting_morning,{hi_gesture_or_not}{greeting}
+greeting_morning,{hi_gesture_or_not}Morning{_name_or_not}
+greeting_morning,{hi_gesture_or_not}Good morning{_name_or_not}
+greeting_afternoon,{hi_gesture_or_not}{greeting}
+greeting_afternoon,{hi_gesture_or_not}Good day{_name_or_not}
+greeting_afternoon,{hi_gesture_or_not}Good afternoon{_name_or_not}
+greeting_evening,{hi_gesture_or_not}Good evening{_name_or_not}
+greeting_evening,{hi_gesture_or_not}{greeting}
 
 greeting_sweet,You're a ray of sunshine.
 greeting_sweet,Hey sweet pea.
@@ -47,17 +47,16 @@ goodbye_,"Let's do this again soon"
 goodbye_,"See you later"
 goodbye_,"See you soon"
 goodbye_,"Take care"
-goodbye,"{bye_gesture_or_not}{goodbye_}{_name_or_not}"
-goodbye,"{hi_gesture_or_not}{goodbye_}{_name_or_not}"
+goodbye,"{goodbye_}{_name_or_not}"
 
-goodbye_morning,{goodbye}
-goodbye_morning,"Enjoy your day{_name_or_not}"
-goodbye_morning,"Here's to a good day{_name_or_not}"
-goodbye_morning,"You have a good day{_name_or_not}"
-goodbye_afternoon,{goodbye}
-goodbye_afternoon,Good afternoon{_name_or_not}
-goodbye_afternoon,Good day{_name_or_not}
-goodbye_night,{goodbye}
+goodbye_morning,{bye_gesture_or_not}{goodbye}
+goodbye_morning,"{bye_gesture_or_not}Enjoy your day{_name_or_not}"
+goodbye_morning,"{bye_gesture_or_not}Here's to a good day{_name_or_not}"
+goodbye_morning,"{bye_gesture_or_not}You have a good day{_name_or_not}"
+goodbye_afternoon,{bye_gesture_or_not}{goodbye}
+goodbye_afternoon,{bye_gesture_or_not}Good afternoon{_name_or_not}
+goodbye_afternoon,{bye_gesture_or_not}Good day{_name_or_not}
+goodbye_night,{bye_gesture_or_not}{goodbye}
 goodbye_night,"*QT/yawn*Good night{_name_or_not}"
 goodbye_night,"*QT/yawn*You have a good night{_name_or_not}"
 
