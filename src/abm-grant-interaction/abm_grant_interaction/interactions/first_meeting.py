@@ -11,8 +11,8 @@ class FirstMeeting:
     class Messages:
         introduce_self = Message(
             content=(
-                    "Nice to meet you, {'db': '%s'}. " % state_db.Keys.USER_NAME +
-                    "My name is QT. I'm a robot made by LuxAI in Luxembourg, a country in Europe. " +
+                    "*QT/hi*Nice to meet you, {'db': '%s'}. " % state_db.Keys.USER_NAME +
+                    "*QT/show_QT*My name is QT. I'm a robot made by LuxAI in Luxembourg, a country in Europe. " +
                     "I'm going to try to help you walk more regularly. " +
                     "I won't go on walks with you*wink*. " +
                     "Instead, I'll ask you questions about your plans to walk and " +
@@ -24,7 +24,7 @@ class FirstMeeting:
         )
         explain_checkin = Message(
             content=(
-                    "To help you walk regularly, we'll talk at least twice a day: " +
+                    "To help you walk regularly, *QT/bored* we'll talk at least twice a day: " +
                     "once in the morning and once in the evening. " +
                     "In the morning, we'll set a walking goal for the day and I'll ask you some questions. " +
                     "These questions will be about your plans to walk or about you. " +
@@ -186,7 +186,7 @@ class FirstMeeting:
             Node(
                 name='first closing',
                 content=(
-                    "Alright, we're all setup! " +
+                    "*QT/bye*Alright, we're all setup! " +
                     "I'll see you for checkin this evening!"
                 ),
                 message_type=Message.Type.MULTIPLE_CHOICE,
