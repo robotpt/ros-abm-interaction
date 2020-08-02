@@ -3,4 +3,5 @@
 rosrun mongodb_log mongodb_log.py \
 	/cordial/gui/display \
 	/cordial/gui/user_response \
-	/abm/automaticity
+	/abm/automaticity \
+	/qt_nuitrack_app/skeletons
