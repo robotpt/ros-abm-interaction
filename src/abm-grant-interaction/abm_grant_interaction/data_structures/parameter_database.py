@@ -84,7 +84,7 @@ class ParameterDb(PickledDatabase):
         )
         self.create_key_if_not_exists(
             ParameterDb.Keys.INACTIVE_INTERACTION_TIMEOUT_SECONDS,
-            90,
+            360,
             tests=check_non_negative_int
         )
         self.create_key_if_not_exists(
