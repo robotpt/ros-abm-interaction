@@ -25,7 +25,7 @@ class Options:
         )
         set_am_checkin = Message(
             content="When would you like to checkin in the morning?",
-            options='is when',
+            options='Okay',
             message_type=Message.Type.TIME_ENTRY,
             args=['15', '8:30'],
             result_db_key=state_db.Keys.AM_CHECKIN_TIME,
@@ -43,7 +43,7 @@ class Options:
         )
         set_pm_checkin = Message(
             content="When should we checkin in the evening?",
-            options='is when',
+            options='Okay',
             message_type=Message.Type.TIME_ENTRY,
             args=['15', '16:00'],
             result_db_key=state_db.Keys.PM_CHECKIN_TIME,
